@@ -78,6 +78,45 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
     }
     return (self.calculatedPt = self.derivedPts[chain][self.derivedPts[chain].length-1][0]);
   };
+
+  var sqrlen = function(a,b)
+  {
+    var sum = 0;
+    for(var i = 0; i < a.length; i++)
+      sum += (a[i]-b[i])*(a[i]-b[i]);
+    return sum;
+  }
+  //attempt to derive closest t for given point- ITERATIVE HILL CLIMBING, NOT PERFECT
+  self.tForPt = function(pt,fromt, scale, depth)
+  {
+    var bestt = fromt;
+    var bestlen = sqrlen(pt,self.ptForT(fromt));
+
+    var pivot = fromt;
+    var p; var plen;
+    var n; var nlen;
+    while(depth > 0)
+    {
+      p = self.ptForT(((pivot-scale)+100)%1); plen = sqrlen(pt,p);
+      n = self.ptForT(((pivot+scale)+100)%1); nlen = sqrlen(pt,n);
+
+      if(plen < bestlen)
+      {
+        bestt = pivot-scale;
+        bestlen = plen;
+      }
+      if(nlen < bestlen)
+      {
+        bestt = pivot+scale;
+        bestlen = nlen;
+      }
+
+      scale /= 2;
+      depth--;
+    }
+    return (bestt + 100)%1;
+  }
+
   self.refreshSettings();
 };
 

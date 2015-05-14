@@ -7,200 +7,269 @@ var GamePlayScene = function(game, stage)
   var hoverer;
   var drawer;
 
-  var Ob = function()
+  var Car = function(s)
   {
     var self = this;
 
-    self.x = 100;
-    self.y = 100;
-    self.vx = 0;
-    self.vy = 0;
-    self.ax = 0;
-    self.ay = 0;
-    self.fx = 10;
-    self.fy = 0;
+    var pt = [];
+    self.t = 0; //t on spline
+    self.s = s; //spline
+    self.on = true;
 
-    self.r = 10;
-    self.m = 100;
-    self.e = 0;
+    self.pos = [0,0];
+    self.ppo = [0,0]; //projected position
+    self.map = [0,0]; //map of projection back to spline
+    self.dir = [0,0]; self.spd = 0;
+    self.vel = [0,0]; //derivable from dir+spd
+    self.pve = [0,0]; //projected vel
+    self.acc = [0,0];
+    self.frc = [0,0];
 
-    self.collidesOb = function(ob, solve)
+    self.x = self.pos[0];
+    self.y = self.pos[1];
+    self.r = 10; //radius (const)
+    self.m = 10; //mass   (const)
+    self.e = 0;  //energy
+
+    var copy = function(a,b)
     {
-      if(Math.abs(self.x-ob.x) < self.r &&
-         Math.abs(self.y-ob.y) < self.r)
-      {
-        if(solve)
-        {
-
-        }
-        return true;
-      }
-      return false;
+      b[0] = a[0];
+      b[1] = a[1];
+      return b;
     }
-    self.collidesInRect = function(x,y,w,h, solve)
+    var lensqr = function(vec)
     {
-      if(self.x+self.r > x && self.x-self.r < x+w &&
-         self.y+self.r > y && self.y-self.r < y+h)
-      {
-        if(solve)
-        {
-
-        }
-        return true;
-      }
-      return false;
+      return vec[0]*vec[0]+vec[1]*vec[1];
     }
-    self.collidesOutRect = function(x,y,w,h, solve)
+    var len = function(vec)
     {
-      if(self.x-self.r < x || self.x+self.r > x+w ||
-         self.y-self.r < y || self.y+self.r > y+h)
-      {
-        if(solve)
-        {
-
-        }
-        return true;
-      }
-      return false;
+      return Math.sqrt(lensqr(vec));
+    }
+    var iseq = function(a,b)
+    {
+      return a[0] == b[0] && a[1] == b[1];
+    }
+    var addr = [0,0];
+    var add = function(a,b)
+    {
+      addr[0] = a[0]+b[0];
+      addr[1] = a[1]+b[1];
+      return addr;
+    }
+    var subr = [0,0];
+    var sub = function(a,b)
+    {
+      subr[0] = a[0]-b[0];
+      subr[1] = a[1]-b[1];
+      return subr;
+    }
+    var scalmul = function(vec,scal)
+    {
+      vec[0] *= scal;
+      vec[1] *= scal;
+      return vec;
+    }
+    var scaldiv = function(vec,scal)
+    {
+      vec[0] /= scal;
+      vec[1] /= scal;
+      return vec;
+    }
+    var norm = function(vec)
+    {
+      scaldiv(vec,len(vec));
+      return vec;
+    }
+    var dot = function(a,b)
+    {
+      return a[0]*b[0]+a[1]*b[1];
+    }
+    var cosangle = function(a,b)
+    {
+      return dot(a,b)/(len(a)*len(b));
+    }
+    var proja = [0,0];
+    var projb = [0,0];
+    var proj = function(a,b)
+    {
+      return scalmul(norm(copy(b,projb)),len(a)*cosangle(a,b));
     }
 
+    self.resetOnSpline = function()
+    {
+      self.t = 0;
+      self.pos = self.s.ptForT(self.t);
+      copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir);
+      norm(self.dir);
+      self.on = true;
+    }
+    self.resetOnSpline();
+    self.applyEnergy = function(e)
+    {
+      //?
+    }
+    self.applyForce = function(f)
+    {
+      self.frc[0] += f*self.dir[0];
+      self.frc[1] += f*self.dir[1];
+    }
+    self.applyForce(1);
+
+    self.collidesCar = function(ob)
+    {
+      return (Math.abs(self.pos[0]-ob.x) < self.r &&
+              Math.abs(self.pos[1]-ob.y) < self.r);
+    }
+    self.collidesInRect = function(x,y,w,h)
+    {
+      return(self.pos[0]+self.r > x && self.pos[0]-self.r < x+w &&
+             self.pos[1]+self.r > y && self.pos[1]-self.r < y+h);
+    }
+    self.collidesOutRect = function(x,y,w,h)
+    {
+      return(self.pos[0]-self.r < x || self.pos[0]+self.r > x+w ||
+             self.pos[1]-self.r < y || self.pos[1]+self.r > y+h);
+    }
+
+    var otherobs = [];
+    var prin = function(canv,thing,vec,y)
+    {
+      //console.log(thing+"("+vec[0]+","+vec[1]+")");
+      stage.drawCanv.context.fillText(thing+"("+vec[0]+","+vec[1]+") : "+len(vec),10,y);
+    }
+    var prinall = function(canv)
+    {
+      canv.context.fillStyle = "#000000";
+      prin(canv,"pos",self.pos,10);
+      prin(canv,"ppo",self.ppo,30);
+      prin(canv,"map",self.map,50);
+      prin(canv,"dir",self.dir,70);
+      prin(canv,"vel",self.vel,90);
+      prin(canv,"pve",self.pve,110);
+      prin(canv,"acc",self.acc,130);
+      prin(canv,"frc",self.frc,150);
+    }
     self.tick = function()
     {
-      self.resolveCollisions([]);
+      if(isNaN(self.pos[0]))
+      {
+        console.log("whu");
+      }
+      self.resolveCollisions(otherobs);
       self.resolveForces();
       self.resolveAccelleration();
       self.resolveVelocity();
     }
     self.resolveCollisions = function(obs)
     {
-      for(var i = 0; i < obs.length; i++)
-      {
-
-      }
     }
     self.resolveForces = function()
     {
-      self.ax += self.fx/self.m;
-      self.ay += self.fy/self.m;
+      self.acc[0] += self.frc[0]/self.m;
+      self.acc[1] += self.frc[1]/self.m;
 
-      self.fx = 0;
-      self.fy = 0;
+      self.frc[0] = 0;
+      self.frc[1] = 0;
     }
     self.resolveAccelleration = function()
     {
-      self.vx += self.ax;
-      self.vy += self.ay;
+      self.vel[0] += self.acc[0];
+      self.vel[1] += self.acc[1];
 
-      var v_squared = self.vx*self.vx+self.vy*self.vy;
-      self.e = self.m*v_squared/2;
+      self.e = self.m*lensqr(self.vel)/2;
 
-      self.ax = 0;
-      self.ay = 0;
+      self.acc[0] = 0;
+      self.acc[1] = 0;
     }
     self.resolveVelocity = function()
     {
-      self.x += self.vx;
-      self.y += self.vy;
+      if(self.vel[0] == 0 && self.vel[1] == 0) return;
+      if(self.on)
+      {
+        var vlen = len(self.vel);
+        copy(add(self.pos,self.vel),self.ppo);
+        var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);
+        copy(self.s.ptForT(tmp_t),self.map);
+        if(iseq(self.map,self.pos)) return;
+        if(lensqr(sub(self.map,self.ppo)) > 1000)
+          self.on = false;
+        else
+        {
+          copy(proj(self.vel,sub(self.map,self.pos)),self.pve);
+          var fric = len(sub(self.pve,self.vel));
+          //self.vel = scalmul(self.pve,100*fric);
+          copy(self.pve,self.vel);
+
+          copy(add(self.pos,self.pve),self.pos);
+
+          self.t = self.s.tForPt(self.pos,tmp_t,vlen,10);
+          copy(self.s.ptForT(self.t),self.pos);
+          copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir);
+          if(self.dir[0] < 0)
+            console.log('wait');
+          norm(self.dir);
+
+          copy(proj(self.vel,self.dir),self.vel);
+        }
+      }
+      if(!self.on)
+      {
+        self.pos[0] += self.vel[0];
+        self.pos[1] += self.vel[1];
+      }
     }
 
     self.draw = function(canv)
     {
+      prinall(canv);
       canv.context.beginPath();
-      canv.context.arc(self.x,self.y,self.r,0,2*Math.PI);
+      canv.context.arc(self.pos[0],self.pos[1],self.r,0,2*Math.PI);
       canv.context.stroke();
     }
   };
 
-  var o;
+  var c;
   var s;
-  //var ps;
-  var ptr;
 
   self.ready = function()
   {
-    clicker = new Clicker({source:stage.dispCanv.canvas});
-    dragger = new Dragger({source:stage.dispCanv.canvas});
-    hoverer = new Hoverer({source:stage.dispCanv.canvas});
-
-    o = new Ob();
     s = new Spline(
-     derivePtsFromPtsMode([ [240,15], [305,12], [405,25], [452,68], [514,148], [524,200], [472,285], [423,284], [376,235], [345,187], [261,145], [236,175], [218,248], [176,272], [65,260], [39,197], [30,86], [84,96] ], PTS_MODE_CUBIC_BEZIER, true),
+     derivePtsFromPtsMode([
+      [240,15],
+      [305,12],
+      [405,25],
+      [452,68],
+      [514,148],
+      [524,200],
+      [472,285],
+      [423,284],
+      [376,235],
+      [345,187],
+      [261,145],
+      [236,175],
+      [218,248],
+      [176,272],
+      [65,260],
+      [39,197],
+      [30,86],
+      [84,96] ], PTS_MODE_CUBIC_BEZIER, true),
     4,1);
+    c = new Car(s);
 
-    ptr = new Ptr(0,0,stage.dispCanv.canvas.width,stage.dispCanv.canvas.height);
-    hoverer.register(ptr);
-    clicker.register(ptr);
-/*
-    ps = [];
-    for(var i = 0; i < 20; i++)
-    {
-      ps.push(new Placer({},i*10,i*10,20,20));
-      var p = ps[i];
-      p.text = ""+i;
-      dragger.register(p);
-      clicker.register(p);
-    }
-*/
+    var pt = s.ptForT(0);
+    c.x = pt[0];
+    c.y = pt[1];
   };
 
-  var t = 0;
-  var ti = 0;
   self.tick = function()
   {
-    o.tick();
-    t += 0.001;
-    ti++;
-    if(t > 1) t = 0;
-    dragger.flush();
-    hoverer.flush();
-    clicker.flush();
-    /*
-    if(ti%10 == 0)
-    {
-      var ptz = [];
-      for(var i = 0; i < ps.length; i++)
-        ptz.push([ps[i].x,ps[i].y]);
-      s.pts = derivePtsFromPtsMode(ptz, PTS_MODE_CUBIC_BEZIER);
-      s.refreshSettings();
-    }
-    */
+    c.tick();
   };
 
   self.draw = function()
   {
     var canv = stage.drawCanv;
-    o.draw(canv);
-
-    var pt = s.ptForT(t);
-    canv.context.beginPath();
-    canv.context.arc(pt[0],pt[1],5,0,2*Math.PI);
-    canv.context.stroke();
-    //Debug Spline
-    for(var i = 0; i < s.pts.length; i++)
-    {
-      if(i%3 == 0) canv.context.strokeStyle = "#FF0000";
-      canv.context.beginPath();
-      canv.context.arc(s.pts[i][0],s.pts[i][1],2,0,2*Math.PI);
-      canv.context.stroke();
-      canv.context.strokeStyle = "#000000";
-    }
-    for(var i = 0; i < s.derivedPts.length; i++)
-    {
-      for(var j = 0; j < s.derivedPts[i].length; j++)
-      {
-        for(var k = 0; k < s.derivedPts[i][j].length-1; k++)
-        {
-          canv.context.beginPath();
-          canv.context.moveTo(s.derivedPts[i][j][k][0],s.derivedPts[i][j][k][1]);
-          canv.context.lineTo(s.derivedPts[i][j][k+1][0],s.derivedPts[i][j][k+1][1]);
-          canv.context.stroke();
-        }
-      }
-    }
-    /*
-    for(var i = 0; i < ps.length; i++)
-      ps[i].draw(canv);
-    */
+    c.draw(canv);
   };
 
   self.cleanup = function()
