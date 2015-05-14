@@ -2,6 +2,11 @@ var GamePlayScene = function(game, stage)
 {
   var self = this;
 
+  var clicker;
+  var dragger;
+  var hoverer;
+  var drawer;
+
   var Ob = function()
   {
     var self = this;
@@ -108,19 +113,57 @@ var GamePlayScene = function(game, stage)
 
   var o;
   var s;
+  //var ps;
+  var ptr;
 
   self.ready = function()
   {
+    clicker = new Clicker({source:stage.dispCanv.canvas});
+    dragger = new Dragger({source:stage.dispCanv.canvas});
+    hoverer = new Hoverer({source:stage.dispCanv.canvas});
+
     o = new Ob();
-    s = new Spline([[100/2,100/2],[200/2,100/2],[200/2,200/2],[300/2,200/2],[300/2,300/2],[400/2,300/2],[400/2,400/2]],4,1);
+    s = new Spline(
+     derivePtsFromPtsMode([ [240,15], [305,12], [405,25], [452,68], [514,148], [524,200], [472,285], [423,284], [376,235], [345,187], [261,145], [236,175], [218,248], [176,272], [65,260], [39,197], [30,86], [84,96] ], PTS_MODE_CUBIC_BEZIER, true),
+    4,1);
+
+    ptr = new Ptr(0,0,stage.dispCanv.canvas.width,stage.dispCanv.canvas.height);
+    hoverer.register(ptr);
+    clicker.register(ptr);
+/*
+    ps = [];
+    for(var i = 0; i < 20; i++)
+    {
+      ps.push(new Placer({},i*10,i*10,20,20));
+      var p = ps[i];
+      p.text = ""+i;
+      dragger.register(p);
+      clicker.register(p);
+    }
+*/
   };
 
   var t = 0;
+  var ti = 0;
   self.tick = function()
   {
     o.tick();
     t += 0.001;
+    ti++;
     if(t > 1) t = 0;
+    dragger.flush();
+    hoverer.flush();
+    clicker.flush();
+    /*
+    if(ti%10 == 0)
+    {
+      var ptz = [];
+      for(var i = 0; i < ps.length; i++)
+        ptz.push([ps[i].x,ps[i].y]);
+      s.pts = derivePtsFromPtsMode(ptz, PTS_MODE_CUBIC_BEZIER);
+      s.refreshSettings();
+    }
+    */
   };
 
   self.draw = function()
@@ -129,11 +172,18 @@ var GamePlayScene = function(game, stage)
     o.draw(canv);
 
     var pt = s.ptForT(t);
-    /*
-    //Debug Spline
     canv.context.beginPath();
     canv.context.arc(pt[0],pt[1],5,0,2*Math.PI);
     canv.context.stroke();
+    //Debug Spline
+    for(var i = 0; i < s.pts.length; i++)
+    {
+      if(i%3 == 0) canv.context.strokeStyle = "#FF0000";
+      canv.context.beginPath();
+      canv.context.arc(s.pts[i][0],s.pts[i][1],2,0,2*Math.PI);
+      canv.context.stroke();
+      canv.context.strokeStyle = "#000000";
+    }
     for(var i = 0; i < s.derivedPts.length; i++)
     {
       for(var j = 0; j < s.derivedPts[i].length; j++)
@@ -147,6 +197,9 @@ var GamePlayScene = function(game, stage)
         }
       }
     }
+    /*
+    for(var i = 0; i < ps.length; i++)
+      ps[i].draw(canv);
     */
   };
 

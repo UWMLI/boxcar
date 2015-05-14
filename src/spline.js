@@ -18,15 +18,7 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
   overlap  - 1
   */
 
-  //General interpolation over any n-dimensional points
-  //For illustrative purposes- actual calculation switches this out for loop-less interp
-  var genInterpAPt = function(pt1, pt2, t, ptr)
-  {
-    for(var i = 0; i < pt1.length; i++)
-      ptr[i] = pt1[i]+((pt2[i]-pt1[i])*t);
-    return ptr;
-  };
-  var interpAPt = genInterpAPt;
+  self.interpAPt = interpAPtGen;
 
   self.t; //last calculated t
   self.derivedPts; //4D array- array of: all chains, all derived pts sets, set of pts, 'pt' AKA n-length array
@@ -56,14 +48,14 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
     {
       switch(self.pts[0].length)
       {
-        case 1: interpAPt = interpAPt1D; break;
-        case 2: interpAPt = interpAPt2D; break;
-        case 3: interpAPt = interpAPt3D; break;
-        case 4: interpAPt = interpAPt4D; break;
-        case 5: interpAPt = interpAPt5D; break;
+        case 1: self.interpAPt = interpAPt1D; break;
+        case 2: self.interpAPt = interpAPt2D; break;
+        case 3: self.interpAPt = interpAPt3D; break;
+        case 4: self.interpAPt = interpAPt4D; break;
+        case 5: self.interpAPt = interpAPt5D; break;
       }
     }
-    else interpAPt = genInterpAPt;
+    else self.interpAPt = interpAPtGen;
 
     //set prev calc'd point to prevent false caching
     self.t = 0;
@@ -81,57 +73,97 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
     while(pass < self.chainlen)
     {
       for(var i = 0; i < self.derivedPts[chain][pass-1].length-1; i++)
-        interpAPt(self.derivedPts[chain][pass-1][i],self.derivedPts[chain][pass-1][i+1],t,self.derivedPts[chain][pass][i]);
+        self.interpAPt(self.derivedPts[chain][pass-1][i],self.derivedPts[chain][pass-1][i+1],t,self.derivedPts[chain][pass][i]);
       pass++;
     }
     return (self.calculatedPt = self.derivedPts[chain][self.derivedPts[chain].length-1][0]);
   };
-
-  //Loop-less algorithms for ever-so-slight performance gains
-  var interpAPt1D = function(pt1, pt2, t, ptr)
-  {
-    ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
-    return ptr;
-  }
-  var interpAPt2D = function(pt1, pt2, t, ptr)
-  {
-    /*
-    console.log(pt1[0]+",a");
-    console.log(pt1[1]+",b");
-    console.log(pt2[0]+",c");
-    console.log(pt2[1]+",d");
-    console.log(ptr[0]+",e");
-    console.log(ptr[1]);
-    */
-    ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
-    ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
-    return ptr;
-  }
-  var interpAPt3D = function(pt1, pt2, t, ptr)
-  {
-    ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
-    ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
-    ptr[2] = pt1[2]+((pt2[2]-pt1[2])*t);
-    return ptr;
-  }
-  var interpAPt4D = function(pt1, pt2, t, ptr)
-  {
-    ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
-    ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
-    ptr[2] = pt1[2]+((pt2[2]-pt1[2])*t);
-    ptr[3] = pt1[3]+((pt2[3]-pt1[3])*t);
-    return ptr;
-  }
-  var interpAPt5D = function(pt1, pt2, t, ptr)
-  {
-    ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
-    ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
-    ptr[2] = pt1[2]+((pt2[2]-pt1[2])*t);
-    ptr[3] = pt1[3]+((pt2[3]-pt1[3])*t);
-    ptr[4] = pt1[4]+((pt2[4]-pt1[4])*t);
-    return ptr;
-  }
-
   self.refreshSettings();
 };
+
+//General interpolation over any n-dimensional points
+var interpAPtGen = function(pt1, pt2, t, ptr)
+{
+  for(var i = 0; i < pt1.length; i++)
+    ptr[i] = pt1[i]+((pt2[i]-pt1[i])*t);
+  return ptr;
+};
+//Loop-less algorithms for ever-so-slight performance gains
+var interpAPt1D = function(pt1, pt2, t, ptr)
+{
+  ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
+  return ptr;
+}
+var interpAPt2D = function(pt1, pt2, t, ptr)
+{
+  /*
+  console.log(pt1[0]+",a");
+  console.log(pt1[1]+",b");
+  console.log(pt2[0]+",c");
+  console.log(pt2[1]+",d");
+  console.log(ptr[0]+",e");
+  console.log(ptr[1]);
+  */
+  ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
+  ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
+  return ptr;
+}
+var interpAPt3D = function(pt1, pt2, t, ptr)
+{
+  ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
+  ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
+  ptr[2] = pt1[2]+((pt2[2]-pt1[2])*t);
+  return ptr;
+}
+var interpAPt4D = function(pt1, pt2, t, ptr)
+{
+  ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
+  ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
+  ptr[2] = pt1[2]+((pt2[2]-pt1[2])*t);
+  ptr[3] = pt1[3]+((pt2[3]-pt1[3])*t);
+  return ptr;
+}
+var interpAPt5D = function(pt1, pt2, t, ptr)
+{
+  ptr[0] = pt1[0]+((pt2[0]-pt1[0])*t);
+  ptr[1] = pt1[1]+((pt2[1]-pt1[1])*t);
+  ptr[2] = pt1[2]+((pt2[2]-pt1[2])*t);
+  ptr[3] = pt1[3]+((pt2[3]-pt1[3])*t);
+  ptr[4] = pt1[4]+((pt2[4]-pt1[4])*t);
+  return ptr;
+}
+
+var PTS_MODE_COUNT = 0;
+var PTS_MODE_CUBIC_BEZIER = PTS_MODE_COUNT; PTS_MODE_COUNT++;
+var derivePtsFromPtsMode = function(pts, mode, connect)
+{
+  switch(mode)
+  {
+    case PTS_MODE_CUBIC_BEZIER:
+    {
+      var newpts = [];
+      var i = 0;
+      while(i < pts.length)
+      {
+        if(i < 4) newpts.push(pts[i]);
+        else
+        {
+          newpts.push(interpAPtGen(pts[i-2],pts[i-1],2,[]));
+          newpts.push(pts[i]); i++;
+          newpts.push(pts[i]);
+        }
+        i++;
+      }
+      if(connect)
+      {
+        newpts.push(interpAPtGen(pts[i-2],pts[i-1],2,[]));
+        newpts.push(interpAPtGen(pts[1],pts[0],2,[]));
+        newpts.push(pts[0]);
+      }
+      return newpts;
+    }
+    break;
+  }
+  return pts;
+}
 
