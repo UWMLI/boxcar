@@ -107,21 +107,47 @@ var GamePlayScene = function(game, stage)
   };
 
   var o;
+  var s;
 
   self.ready = function()
   {
     o = new Ob();
+    s = new Spline([[100/2,100/2],[200/2,100/2],[200/2,200/2],[300/2,200/2],[300/2,300/2],[400/2,300/2],[400/2,400/2]],4,1);
   };
 
+  var t = 0;
   self.tick = function()
   {
     o.tick();
+    t += 0.001;
+    if(t > 1) t = 0;
   };
 
   self.draw = function()
   {
     var canv = stage.drawCanv;
     o.draw(canv);
+
+    var pt = s.ptForT(t);
+    /*
+    //Debug Spline
+    canv.context.beginPath();
+    canv.context.arc(pt[0],pt[1],5,0,2*Math.PI);
+    canv.context.stroke();
+    for(var i = 0; i < s.derivedPts.length; i++)
+    {
+      for(var j = 0; j < s.derivedPts[i].length; j++)
+      {
+        for(var k = 0; k < s.derivedPts[i][j].length-1; k++)
+        {
+          canv.context.beginPath();
+          canv.context.moveTo(s.derivedPts[i][j][k][0],s.derivedPts[i][j][k][1]);
+          canv.context.lineTo(s.derivedPts[i][j][k+1][0],s.derivedPts[i][j][k+1][1]);
+          canv.context.stroke();
+        }
+      }
+    }
+    */
   };
 
   self.cleanup = function()
