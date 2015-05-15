@@ -9,6 +9,67 @@ var GamePlayScene = function(game, stage)
   var hoverer;
   var drawer;
 
+  var ForceBtn = function()
+  {
+    var self = this;
+
+    self.x = 0;
+    self.y = 0;
+    self.w = 100;
+    self.h = 100;
+
+    self.click = function(evt)
+    {
+      c.applyForce(10);
+    }
+
+    self.draw = function(canv)
+    {
+      canv.context.strokeRect(self.x,self.y,self.w,self.h);
+    }
+  }
+
+  var Track = function(s)
+  {
+    var self = this;
+
+    self.s = s;
+
+    self.canv = new Canv({width:stage.drawCanv.canvas.width,height:stage.drawCanv.canvas.height});
+    var stampSpline = function(c,s,r,w)
+    {
+      var pt = [0,0];
+      c.context.lineWidth = w;
+      c.context.beginPath();
+
+      pt = s.ptForT(0);
+      c.context.moveTo(pt[0],pt[1]);
+      for(var i = 1; i < r; i++)
+      {
+        pt = s.ptForT(i/r);
+        c.context.lineTo(pt[0],pt[1]);
+      }
+      pt = s.ptForT(1);
+      c.context.lineTo(pt[0],pt[1]);
+
+      c.context.stroke();
+    }
+    self.refreshCanv = function()
+    {
+      self.canv.clear();
+      self.canv.context.strokeStyle = "#999999";
+      stampSpline(self.canv,self.s,1000,20);
+      self.canv.context.strokeStyle = "#000000";
+      stampSpline(self.canv,self.s,1000,1);
+    }
+    self.refreshCanv();
+
+    self.draw = function(canv)
+    {
+      self.canv.blitTo(canv);
+    }
+  }
+
   var Car = function(s)
   {
     var self = this;
@@ -26,6 +87,7 @@ var GamePlayScene = function(game, stage)
     self.pve = [0,0]; //projected vel
     self.acc = [0,0];
     self.frc = [0,0];
+    self.ffr = [0,0]; //force of friction
 
     self.x = self.pos[0];
     self.y = self.pos[1];
@@ -176,11 +238,11 @@ var GamePlayScene = function(game, stage)
       prin(canv,"ppo",self.ppo,30);
 
       canv.context.strokeStyle = "#00FF00";
-      drawPt(canv,self.map,2);
+      drawPt(canv,self.map,5);
       prin(canv,"map",self.map,50);
 
       canv.context.strokeStyle = "#00FFFF";
-      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.dir,[0,0]),10)));
+      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.dir,[0,0]),100)));
       prin(canv,"dir",self.dir,70);
 
       canv.context.strokeStyle = "#FF0000";
@@ -198,12 +260,13 @@ var GamePlayScene = function(game, stage)
       canv.context.strokeStyle = "#000000";
       drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.frc,[0,0]),10)));
       prin(canv,"frc",self.frc,150);
+
+      canv.context.strokeStyle = "#000000";
+      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.ffr,[0,0]),10)));
+      prin(canv,"ffr",self.ffr,170);
     }
-    self.ticktimer = 0;
     self.tick = function()
     {
-      self.ticktimer++;
-      if(self.ticktimer%100 != 0) return;
       self.resolveCollisions(otherobs);
       self.resolveForces();
       self.resolveAccelleration();
@@ -214,9 +277,13 @@ var GamePlayScene = function(game, stage)
     }
     self.resolveForces = function()
     {
+      self.frc[0] += self.ffr[0];
+      self.frc[1] += self.ffr[1];
       self.acc[0] += self.frc[0]/self.m;
       self.acc[1] += self.frc[1]/self.m;
 
+      self.frc[0] = 0;
+      self.frc[1] = 0;
       self.frc[0] = 0;
       self.frc[1] = 0;
     }
@@ -240,13 +307,12 @@ var GamePlayScene = function(game, stage)
         var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);
         copy(self.s.ptForT(tmp_t),self.map);
         if(iseq(self.map,self.pos)) return;
-        if(lensqr(sub(self.map,self.ppo)) > 1000)
+        if(false)//(lensqr(sub(self.map,self.ppo)) > 1000)
           self.on = false;
         else
         {
           copy(proj(self.vel,sub(self.map,self.pos)),self.pve);
-          var fric = len(sub(self.pve,self.vel));
-          //self.vel = scalmul(self.pve,100*fric);
+          copy(sub(self.pve,self.vel),self.ffr);
           copy(self.pve,self.vel);
 
           copy(add(self.pos,self.pve),self.pos);
@@ -271,45 +337,18 @@ var GamePlayScene = function(game, stage)
       prinall(canv);
 
       drawPt(canv,self.pos,self.r);
-
-      canv.context.strokeStyle = "#FF0000";
-      for(var i = 0; i < depthtesta.length; i++)
-        drawPt(canv,depthtesta[i],2);
-      canv.context.strokeStyle = "#00FF00";
-      for(var i = 0; i < depthtestb.length; i++)
-        drawPt(canv,depthtestb[i],2);
-
-    //Debug Spline
-    for(var i = 0; i < s.pts.length; i++)
-    {
-      if(i%3 == 0) canv.context.strokeStyle = "#FF0000";
-      drawPt(canv,s.pts[i],2);
-      canv.context.strokeStyle = "#888888";
-    }
-    for(var i = 0; i < s.derivedPts.length; i++)
-    {
-      for(var j = 0; j < s.derivedPts[i].length; j++)
-      {
-        for(var k = 0; k < s.derivedPts[i][j].length-1; k++)
-        {
-          canv.context.beginPath();
-          canv.context.moveTo(s.derivedPts[i][j][k][0],s.derivedPts[i][j][k][1]);
-          canv.context.lineTo(s.derivedPts[i][j][k+1][0],s.derivedPts[i][j][k+1][1]);
-          canv.context.stroke();
-        }
-      }
-    }
-
-
-
     }
   };
 
+  var t;
   var c;
   var s;
+  var f;
 
   self.ready = function()
   {
+    clicker = new Clicker({source:stage.dispCanv.canvas});
+
     s = new Spline(
      derivePtsFromPtsMode([
       [240,15],
@@ -331,7 +370,11 @@ var GamePlayScene = function(game, stage)
       [30,86],
       [84,96] ], PTS_MODE_CUBIC_BEZIER, true),
     4,1);
+    t = new Track(s);
     c = new Car(s);
+
+    f = new ForceBtn();
+    clicker.register(f);
 
     var pt = s.ptForT(0);
     c.x = pt[0];
@@ -340,13 +383,48 @@ var GamePlayScene = function(game, stage)
 
   self.tick = function()
   {
+    clicker.flush();
     c.tick();
   };
 
   self.draw = function()
   {
     var canv = stage.drawCanv;
+    t.draw(canv);
     c.draw(canv);
+    f.draw(canv);
+
+/*
+      //Debug Spline
+
+      canv.context.strokeStyle = "#FF0000";
+      for(var i = 0; i < depthtesta.length; i++)
+        drawPt(canv,depthtesta[i],2);
+      canv.context.strokeStyle = "#00FF00";
+      for(var i = 0; i < depthtestb.length; i++)
+        drawPt(canv,depthtestb[i],2);
+
+      for(var i = 0; i < s.pts.length; i++)
+      {
+        if(i%3 == 0) canv.context.strokeStyle = "#FF0000";
+        drawPt(canv,s.pts[i],2);
+        canv.context.strokeStyle = "#888888";
+      }
+      for(var i = 0; i < s.derivedPts.length; i++)
+      {
+        for(var j = 0; j < s.derivedPts[i].length; j++)
+        {
+          for(var k = 0; k < s.derivedPts[i][j].length-1; k++)
+          {
+            canv.context.beginPath();
+            canv.context.moveTo(s.derivedPts[i][j][k][0],s.derivedPts[i][j][k][1]);
+            canv.context.lineTo(s.derivedPts[i][j][k+1][0],s.derivedPts[i][j][k+1][1]);
+            canv.context.stroke();
+          }
+        }
+      }
+  */
+
   };
 
   self.cleanup = function()
