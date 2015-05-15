@@ -143,6 +143,8 @@ var GamePlayScene = function(game, stage)
     self.r = 10; //radius (const)
     self.m = 10; //mass   (const)
     self.e = 0;  //energy
+    self.danger = 0; //about-to-fall-off-ness
+    self.maxdanger = 0.9; //when you fall off
 
     self.resetOnSpline = function()
     {
@@ -150,6 +152,7 @@ var GamePlayScene = function(game, stage)
       copy(self.s.ptForT(self.t),self.pos);
       copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir);
       norm(self.dir);
+      self.danger = 0;
       self.on = true;
     }
     self.resetOnSpline();
@@ -279,8 +282,8 @@ var GamePlayScene = function(game, stage)
         var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);      //find closest t for ppo
         copy(self.s.ptForT(tmp_t),self.map);                         //nearest ppo -> map
         if(iseq(self.map,self.pos)) return;                          //(if map is pos [no movement] return)
-        if(len(sub(self.map,self.ppo)) > 0.9)
-          self.on = false;
+        self.danger = len(sub(self.map,self.ppo));
+        if(self.danger > self.maxdanger) self.on = false;
         else
         {
           copy(proj(self.vel,sub(self.map,self.pos)),self.pve);      //project velocity onto pos2map -> pve
@@ -310,7 +313,12 @@ var GamePlayScene = function(game, stage)
     self.draw = function(canv)
     {
       prinall(canv);
+      var d = self.danger/self.maxdanger;
+      canv.context.strokeStyle = "rgba("+Math.floor(d*255)+",0,0,1)";
+      console.log(canv.context.strokeStyle);
+      canv.context.lineWidth = 3;
       drawPt(canv,self.pos,self.r);
+      canv.context.lineWidth = 1;
     }
   };
 
