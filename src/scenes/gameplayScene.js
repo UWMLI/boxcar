@@ -13,6 +13,13 @@ var GamePlayScene = function(game, stage)
   var c;
   var s;
   var f;
+  var g;
+  var showgraph = false;
+
+  var Timer = function()
+  {
+
+  }
 
   var ForceBtn = function()
   {
@@ -33,8 +40,26 @@ var GamePlayScene = function(game, stage)
     self.tick = function(evt) { if(self.pressing) c.applyForce(1); }
     self.draw = function(canv) { canv.context.strokeRect(self.x,self.y,self.w,self.h); }
   }
+  var GraphBtn = function()
+  {
+    var self = this;
 
-  var simpGraph = function(x,y,w,h,min,max,color)
+    self.x = stage.drawCanv.canvas.width-10;
+    self.y = stage.drawCanv.canvas.height-10;
+    self.w = 10;
+    self.h = 10;
+
+    self.pressing = false;
+    self.press = function(evt)
+    {
+      if(!self.pressing) showgraph = !showgraph;
+      self.pressing = true;
+    }
+    self.unpress = function(evt){ self.pressing = false; }
+    self.draw = function(canv) { canv.context.strokeRect(self.x,self.y,self.w,self.h); }
+  }
+
+  var SimpGraph = function(x,y,w,h,min,max,color)
   {
     var self = this;
 
@@ -128,15 +153,15 @@ var GamePlayScene = function(game, stage)
     self.s = s; //spline
     self.on = true;
 
-    self.posg = new simpGraph(0,  0,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.pos = [0,0]; self.posd = [0,0]; //last position delta
-    self.ppog = new simpGraph(0, 40,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.ppo = [0,0]; //projected position
-    self.mapg = new simpGraph(0, 80,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.map = [0,0]; //map of projection back to spline
-    self.dirg = new simpGraph(0,120,stage.drawCanv.canvas.width/2,40,0,2,"#000000"); self.dir = [0,0]; self.spd = 0;
-    self.velg = new simpGraph(0,160,stage.drawCanv.canvas.width/2,40,0,20,"#FF0000"); self.vel = [0,0]; //derivable from dir+spd
-    self.pveg = new simpGraph(0,200,stage.drawCanv.canvas.width/2,40,0,20,"#000000"); self.pve = [0,0]; //projected vel
-    self.accg = new simpGraph(0,240,stage.drawCanv.canvas.width/2,40,0,0.5,"#000000"); self.acc = [0,0]; self.cacc = [0,0]; //cached accel for logging
-    self.frcg = new simpGraph(0,280,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.frc = [0,0]; self.cfrc = [0,0]; //cached frc for logging
-    self.ffrg = new simpGraph(0,320,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.ffr = [0,0]; self.cffr = [0,0]; //cached ffr for logging //force of friction
+    self.posg = new SimpGraph(0,  0,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.pos = [0,0]; self.posd = [0,0]; //last position delta
+    self.ppog = new SimpGraph(0, 40,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.ppo = [0,0]; //projected position
+    self.mapg = new SimpGraph(0, 80,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.map = [0,0]; //map of projection back to spline
+    self.dirg = new SimpGraph(0,120,stage.drawCanv.canvas.width/2,40,0,2,"#000000"); self.dir = [0,0]; self.spd = 0;
+    self.velg = new SimpGraph(0,160,stage.drawCanv.canvas.width/2,40,0,20,"#FF0000"); self.vel = [0,0]; //derivable from dir+spd
+    self.pveg = new SimpGraph(0,200,stage.drawCanv.canvas.width/2,40,0,20,"#000000"); self.pve = [0,0]; //projected vel
+    self.accg = new SimpGraph(0,240,stage.drawCanv.canvas.width/2,40,0,0.5,"#000000"); self.acc = [0,0]; self.cacc = [0,0]; //cached accel for logging
+    self.frcg = new SimpGraph(0,280,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.frc = [0,0]; self.cfrc = [0,0]; //cached frc for logging
+    self.ffrg = new SimpGraph(0,320,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.ffr = [0,0]; self.cffr = [0,0]; //cached ffr for logging //force of friction
 
     self.x = self.pos[0];
     self.y = self.pos[1];
@@ -312,10 +337,9 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function(canv)
     {
-      prinall(canv);
+      if(showgraph) prinall(canv);
       var d = self.danger/self.maxdanger;
       canv.context.strokeStyle = "rgba("+Math.floor(d*255)+",0,0,1)";
-      console.log(canv.context.strokeStyle);
       canv.context.lineWidth = 3;
       drawPt(canv,self.pos,self.r);
       canv.context.lineWidth = 1;
@@ -351,7 +375,9 @@ var GamePlayScene = function(game, stage)
     c = new Car(s);
 
     f = new ForceBtn();
+    g = new GraphBtn();
     presser.register(f);
+    presser.register(g);
 
     var pt = s.ptForT(0);
     c.x = pt[0];
@@ -378,6 +404,7 @@ var GamePlayScene = function(game, stage)
     t.draw(canv);
     c.draw(canv);
     f.draw(canv);
+    g.draw(canv);
 
 /*
       //Debug Spline
