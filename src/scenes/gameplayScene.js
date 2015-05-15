@@ -27,6 +27,50 @@ var GamePlayScene = function(game, stage)
     self.draw = function(canv) { canv.context.strokeRect(self.x,self.y,self.w,self.h); }
   }
 
+  var simpGraph = function(x,y,w,h,min,max,color)
+  {
+    var self = this;
+
+    self.x = x;
+    self.y = y;
+    self.w = w;
+    self.h = h;
+
+    self.min = min;
+    self.max = max;
+    self.color = color;
+
+    self.canv = [];
+    self.canv[0] = new Canv({width:self.w,height:self.h});
+    self.canv[1] = new Canv({width:self.w,height:self.h});
+    self.canv[0].clear();
+    self.canv[1].clear();
+    self.canv[0].context.fillStyle   = self.color;
+    self.canv[0].context.strokeStyle = self.color;
+    self.canv[1].context.fillStyle   = self.color;
+    self.canv[1].context.strokeStyle = self.color;
+    self.curcanv = 0
+
+    self.plot = function(n)
+    {
+      self.canv[(self.curcanv+1)%2].clear();
+      self.canv[(self.curcanv+1)%2].context.drawImage(self.canv[self.curcanv].canvas, 0, 0, self.w, self.h, 2, 0, self.w-2, self.h);
+      self.curcanv = (self.curcanv+1)%2;
+
+      self.canv[self.curcanv].context.strokeStyle = self.color;
+      self.canv[self.curcanv].context.beginPath();
+      var y = ((n-self.min)/(self.max-self.min))*self.h
+      self.canv[self.curcanv].context.moveTo(0,self.h-y);
+      self.canv[self.curcanv].context.lineTo(2,self.h-y);
+      self.canv[self.curcanv].context.stroke();
+    }
+    self.draw = function(canv)
+    {
+      canv.context.strokeRect(self.x,self.y,self.w,self.h);
+      canv.context.drawImage(self.canv[self.curcanv].canvas, 0, 0, self.w, self.h, self.x, self.y, self.w, self.h);
+    }
+  }
+
   var Track = function(s)
   {
     var self = this;
@@ -77,15 +121,15 @@ var GamePlayScene = function(game, stage)
     self.s = s; //spline
     self.on = true;
 
-    self.pos = [0,0];
-    self.ppo = [0,0]; //projected position
-    self.map = [0,0]; //map of projection back to spline
-    self.dir = [0,0]; self.spd = 0;
-    self.vel = [0,0]; //derivable from dir+spd
-    self.pve = [0,0]; //projected vel
-    self.acc = [0,0];
-    self.frc = [0,0];
-    self.ffr = [0,0]; //force of friction
+    self.posg = new simpGraph(0,  0,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.pos = [0,0];
+    self.ppog = new simpGraph(0, 40,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.ppo = [0,0]; //projected position
+    self.mapg = new simpGraph(0, 80,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.map = [0,0]; //map of projection back to spline
+    self.dirg = new simpGraph(0,120,stage.drawCanv.canvas.width/2,40,0,2,"#000000"); self.dir = [0,0]; self.spd = 0;
+    self.velg = new simpGraph(0,160,stage.drawCanv.canvas.width/2,40,0,20,"#000000"); self.vel = [0,0]; //derivable from dir+spd
+    self.pveg = new simpGraph(0,200,stage.drawCanv.canvas.width/2,40,0,20,"#000000"); self.pve = [0,0]; //projected vel
+    self.accg = new simpGraph(0,240,stage.drawCanv.canvas.width/2,40,0,0.5,"#000000"); self.acc = [0,0]; self.cacc = [0,0]; //cached accel for logging
+    self.frcg = new simpGraph(0,280,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.frc = [0,0]; self.cfrc = [0,0]; //cached frc for logging
+    self.ffrg = new simpGraph(0,320,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.ffr = [0,0]; self.cffr = [0,0]; //cached ffr for logging //force of friction
 
     self.x = self.pos[0];
     self.y = self.pos[1];
@@ -133,40 +177,58 @@ var GamePlayScene = function(game, stage)
     {
       canv.context.fillStyle = "#000000";
       canv.context.strokeStyle = "#000000";
+      self.posg.plot(len(self.pos));
+      self.posg.draw(canv);
       drawPt(canv,self.pos,2);
-      prin(canv,"pos",self.pos,10);
+      //prin(canv,"pos",self.pos,10);
 
       canv.context.strokeStyle = "#0000FF";
+      self.ppog.plot(len(self.ppo));
+      self.ppog.draw(canv);
       drawPt(canv,self.ppo,2);
-      prin(canv,"ppo",self.ppo,30);
+      //prin(canv,"ppo",self.ppo,30);
 
       canv.context.strokeStyle = "#00FF00";
+      self.mapg.plot(len(self.map));
+      self.mapg.draw(canv);
       drawPt(canv,self.map,5);
-      prin(canv,"map",self.map,50);
+      //prin(canv,"map",self.map,50);
 
       canv.context.strokeStyle = "#00FFFF";
+      self.dirg.plot(len(self.dir));
+      self.dirg.draw(canv);
       drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.dir,[0,0]),100)));
-      prin(canv,"dir",self.dir,70);
+      //prin(canv,"dir",self.dir,70);
 
       canv.context.strokeStyle = "#FF0000";
+      self.velg.plot(len(self.vel));
+      self.velg.draw(canv);
       drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.vel,[0,0]),10)));
-      prin(canv,"vel",self.vel,90);
+      //prin(canv,"vel",self.vel,90);
 
       canv.context.strokeStyle = "#FF00FF";
+      self.pveg.plot(len(self.pve));
+      self.pveg.draw(canv);
       drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.pve,[0,0]),10)));
-      prin(canv,"pve",self.pve,110);
+      //prin(canv,"pve",self.pve,110);
 
       canv.context.strokeStyle = "#FFFF00";
-      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.acc,[0,0]),10)));
-      prin(canv,"acc",self.acc,130);
+      self.accg.plot(len(self.cacc));
+      self.accg.draw(canv);
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.cacc,[0,0]),10)));
+      //prin(canv,"acc",self.cacc,130);
 
       canv.context.strokeStyle = "#000000";
+      self.frcg.plot(len(self.frc));
+      self.frcg.draw(canv);
       drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.frc,[0,0]),10)));
-      prin(canv,"frc",self.frc,150);
+      //prin(canv,"frc",self.frc,150);
 
       canv.context.strokeStyle = "#000000";
+      self.ffrg.plot(len(self.ffr));
+      self.ffrg.draw(canv);
       drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.ffr,[0,0]),10)));
-      prin(canv,"ffr",self.ffr,170);
+      //prin(canv,"ffr",self.ffr,170);
     }
     self.tick = function()
     {
@@ -181,8 +243,10 @@ var GamePlayScene = function(game, stage)
       self.acc[0] += self.frc[0]/self.m;
       self.acc[1] += self.frc[1]/self.m;
 
-      self.frc[0] = 0;
-      self.frc[1] = 0;
+      copy(self.ffr,self.cffr);
+      copy(self.frc,self.cfrc);
+      self.ffr[0] = 0;
+      self.ffr[1] = 0;
       self.frc[0] = 0;
       self.frc[1] = 0;
     }
@@ -193,6 +257,7 @@ var GamePlayScene = function(game, stage)
 
       self.e = self.m*lensqr(self.vel)/2;
 
+      copy(self.acc,self.cacc);
       self.acc[0] = 0;
       self.acc[1] = 0;
     }
@@ -234,7 +299,6 @@ var GamePlayScene = function(game, stage)
     self.draw = function(canv)
     {
       prinall(canv);
-
       drawPt(canv,self.pos,self.r);
     }
   };
