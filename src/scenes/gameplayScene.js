@@ -1,5 +1,3 @@
-var depthtesta = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
-var depthtestb = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
 var GamePlayScene = function(game, stage)
 {
   var self = this;
@@ -9,16 +7,58 @@ var GamePlayScene = function(game, stage)
   var hoverer;
   var drawer;
 
-  var t;
+  var track;
   var c;
   var s;
   var f;
   var g;
+  var timer;
   var showgraph = false;
 
   var Timer = function()
   {
+    var self = this;
 
+    self.x = stage.drawCanv.canvas.width-100;
+    self.y = 120;
+    self.w = 100;
+    self.h = 500;
+
+    self.times = [];
+    self.t = 0;
+    self.best = 9999999;
+
+    self.tick = function()
+    {
+      self.t++;
+    }
+    self.lap = function()
+    {
+      if(self.t < 20) { self.reset(); return; } //bad lap reading
+      if(self.t < self.best)
+      self.best = self.t;
+
+      self.times.push(self.t);
+      self.t = 0;
+    }
+    self.reset = function()
+    {
+      self.t = 0;
+    }
+    self.draw = function(canv)
+    {
+      if(c.on) canv.context.fillStyle = "#000000";
+      else     canv.context.fillStyle = "#FF0000";
+      canv.context.fillText("Time: "+self.t,self.x,self.y);
+      canv.context.fillText("Best: "+self.best,self.x,self.y+20);
+      var y = self.y+40;
+      canv.context.fillStyle = "#000000";
+      for(var i = 0; i < self.times.length; i++)
+      {
+        canv.context.fillText((self.times.length-i)+": "+self.times[self.times.length-i-1],self.x,y);
+        y+=20;
+      }
+    }
   }
 
   var ForceBtn = function()
@@ -33,11 +73,15 @@ var GamePlayScene = function(game, stage)
     self.pressing = false;
     self.press = function(evt)
     {
-      if(!self.pressing && !c.on) c.resetOnSpline();
+      if(!self.pressing && !c.on)
+      {
+        c.resetOnSpline();
+        timer.reset();
+      }
       self.pressing = true;
     }
     self.unpress = function(evt){ self.pressing = false; }
-    self.tick = function(evt) { if(self.pressing) c.applyForce(1); }
+    self.tick = function(evt) { if(self.pressing) c.applyForce(2); }
     self.draw = function(canv) { canv.context.strokeRect(self.x,self.y,self.w,self.h); }
   }
   var GraphBtn = function()
@@ -150,6 +194,7 @@ var GamePlayScene = function(game, stage)
 
     var pt = [];
     self.t = 0; //t on spline
+    self.gt = false; //"greater than" 0.5 (half way around the track) used to measure laps
     self.s = s; //spline
     self.on = true;
 
@@ -171,16 +216,6 @@ var GamePlayScene = function(game, stage)
     self.danger = 0; //about-to-fall-off-ness
     self.maxdanger = 0.9; //when you fall off
 
-    self.resetOnSpline = function()
-    {
-      self.t = 0;
-      copy(self.s.ptForT(self.t),self.pos);
-      copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir);
-      norm(self.dir);
-      self.danger = 0;
-      self.on = true;
-    }
-    self.resetOnSpline();
     self.applyEnergy = function(e)
     {
       //?
@@ -190,7 +225,6 @@ var GamePlayScene = function(game, stage)
       self.frc[0] += f*self.dir[0];
       self.frc[1] += f*self.dir[1];
     }
-    self.applyForce(1);
 
     self.collidesCar = function(ob)
     {
@@ -270,6 +304,15 @@ var GamePlayScene = function(game, stage)
       self.resolveForces();
       self.resolveAccelleration();
       self.resolveVelocity();
+      if(self.t > 0.5)
+      {
+        self.gt = true;
+      }
+      if(self.gt && self.t < 0.5)
+      {
+        self.gt = false;
+        timer.lap();
+      }
     }
     self.resolveForces = function()
     {
@@ -344,6 +387,24 @@ var GamePlayScene = function(game, stage)
       drawPt(canv,self.pos,self.r);
       canv.context.lineWidth = 1;
     }
+
+    self.resetOnSpline = function()
+    {
+      self.t = 0;
+      self.gt = false;
+      copy(self.s.ptForT(self.t),self.pos);
+      copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir);
+      norm(self.dir);
+      self.danger = 0;
+      self.on = true;
+
+      self.vel = [0,0];
+      self.acc = [0,0];
+      self.frc = [0,0];
+      self.ffr = [0,0];
+      self.applyForce(1);
+    }
+    self.resetOnSpline();
   };
 
   self.ready = function()
@@ -371,7 +432,8 @@ var GamePlayScene = function(game, stage)
       [30,86],
       [84,96] ], PTS_MODE_CUBIC_BEZIER, true),
     4,1);
-    t = new Track(s);
+    track = new Track(s);
+    timer = new Timer();
     c = new Car(s);
 
     f = new ForceBtn();
@@ -393,6 +455,7 @@ var GamePlayScene = function(game, stage)
     ttim+=10;
     if(ttim%10 == 0)
     {
+      timer.tick();
       c.tick();
       f.tick();
     }
@@ -401,42 +464,11 @@ var GamePlayScene = function(game, stage)
   self.draw = function()
   {
     var canv = stage.drawCanv;
-    t.draw(canv);
+    track.draw(canv);
     c.draw(canv);
     f.draw(canv);
     g.draw(canv);
-
-/*
-      //Debug Spline
-
-      canv.context.strokeStyle = "#FF0000";
-      for(var i = 0; i < depthtesta.length; i++)
-        drawPt(canv,depthtesta[i],2);
-      canv.context.strokeStyle = "#00FF00";
-      for(var i = 0; i < depthtestb.length; i++)
-        drawPt(canv,depthtestb[i],2);
-
-      for(var i = 0; i < s.pts.length; i++)
-      {
-        if(i%3 == 0) canv.context.strokeStyle = "#FF0000";
-        drawPt(canv,s.pts[i],2);
-        canv.context.strokeStyle = "#888888";
-      }
-      for(var i = 0; i < s.derivedPts.length; i++)
-      {
-        for(var j = 0; j < s.derivedPts[i].length; j++)
-        {
-          for(var k = 0; k < s.derivedPts[i][j].length-1; k++)
-          {
-            canv.context.beginPath();
-            canv.context.moveTo(s.derivedPts[i][j][k][0],s.derivedPts[i][j][k][1]);
-            canv.context.lineTo(s.derivedPts[i][j][k+1][0],s.derivedPts[i][j][k+1][1]);
-            canv.context.stroke();
-          }
-        }
-      }
-  */
-
+    timer.draw(canv);
   };
 
   self.cleanup = function()
