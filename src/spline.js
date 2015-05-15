@@ -65,6 +65,7 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
   self.ptForT = function(t)
   {
     if(t == self.t) return self.calculatedPt; //no need to recalculate
+    t = (t+100)%1;
     self.t = t;
 
     var pass = 1; //'pass 0' is the population of the unchanging base pts
@@ -72,6 +73,11 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
     t = (self.t - chain*(1/self.numchains))/(1/self.numchains);
     while(pass < self.chainlen)
     {
+      if(self.derivedPts === undefined ||
+         self.derivedPts[chain] === undefined)
+         {
+          console.log("OH NO");
+         }
       for(var i = 0; i < self.derivedPts[chain][pass-1].length-1; i++)
         self.interpAPt(self.derivedPts[chain][pass-1][i],self.derivedPts[chain][pass-1][i+1],t,self.derivedPts[chain][pass][i]);
       pass++;
@@ -87,8 +93,13 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
     return sum;
   }
   //attempt to derive closest t for given point- ITERATIVE HILL CLIMBING, NOT PERFECT
+  self.everyoth = 0;
   self.tForPt = function(pt,fromt, scale, depth)
   {
+    var depthtest;
+    if(self.everyoth%2 == 0) depthtest = depthtesta;
+    else                     depthtest = depthtestb;
+    self.everyoth++;
     var bestt = fromt;
     var bestlen = sqrlen(pt,self.ptForT(fromt));
 
@@ -100,15 +111,34 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
       p = self.ptForT(((pivot-scale)+100)%1); plen = sqrlen(pt,p);
       n = self.ptForT(((pivot+scale)+100)%1); nlen = sqrlen(pt,n);
 
+      depthtest[depth][0] = 0;
       if(plen < bestlen)
       {
         bestt = pivot-scale;
         bestlen = plen;
+        if(depthtest[depth] === undefined)
+        {
+          console.log("what no");
+        }
+        depthtest[depth][0] = p[0];
+        depthtest[depth][1] = p[1];
       }
       if(nlen < bestlen)
       {
         bestt = pivot+scale;
         bestlen = nlen;
+        if(depthtest[depth] === undefined)
+        {
+          console.log("what no");
+        }
+        depthtest[depth][0] = n[0];
+        depthtest[depth][1] = n[1];
+      }
+      if(depthtest[depth][0] == 0)
+      {
+        var p = self.ptForT(bestt);
+        depthtest[depth][0] = p[0];
+        depthtest[depth][1] = p[1];
       }
 
       scale /= 2;
