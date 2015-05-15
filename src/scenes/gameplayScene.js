@@ -4,7 +4,7 @@ var GamePlayScene = function(game, stage)
 {
   var self = this;
 
-  var clicker;
+  var presser;
   var dragger;
   var hoverer;
   var drawer;
@@ -23,7 +23,10 @@ var GamePlayScene = function(game, stage)
     self.w = 100;
     self.h = 100;
 
-    self.click = function(evt) { c.applyForce(10); }
+    self.pressing = false;
+    self.press = function(evt){ self.pressing = true; }
+    self.unpress = function(evt){ self.pressing = false; }
+    self.tick = function(evt) { if(self.pressing) c.applyForce(1); }
     self.draw = function(canv) { canv.context.strokeRect(self.x,self.y,self.w,self.h); }
   }
 
@@ -121,11 +124,11 @@ var GamePlayScene = function(game, stage)
     self.s = s; //spline
     self.on = true;
 
-    self.posg = new simpGraph(0,  0,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.pos = [0,0];
+    self.posg = new simpGraph(0,  0,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.pos = [0,0]; self.posd = [0,0]; //last position delta
     self.ppog = new simpGraph(0, 40,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.ppo = [0,0]; //projected position
     self.mapg = new simpGraph(0, 80,stage.drawCanv.canvas.width/2,40,0,2*stage.drawCanv.canvas.width,"#000000"); self.map = [0,0]; //map of projection back to spline
     self.dirg = new simpGraph(0,120,stage.drawCanv.canvas.width/2,40,0,2,"#000000"); self.dir = [0,0]; self.spd = 0;
-    self.velg = new simpGraph(0,160,stage.drawCanv.canvas.width/2,40,0,20,"#000000"); self.vel = [0,0]; //derivable from dir+spd
+    self.velg = new simpGraph(0,160,stage.drawCanv.canvas.width/2,40,0,20,"#FF0000"); self.vel = [0,0]; //derivable from dir+spd
     self.pveg = new simpGraph(0,200,stage.drawCanv.canvas.width/2,40,0,20,"#000000"); self.pve = [0,0]; //projected vel
     self.accg = new simpGraph(0,240,stage.drawCanv.canvas.width/2,40,0,0.5,"#000000"); self.acc = [0,0]; self.cacc = [0,0]; //cached accel for logging
     self.frcg = new simpGraph(0,280,stage.drawCanv.canvas.width/2,40,0,10,"#000000"); self.frc = [0,0]; self.cfrc = [0,0]; //cached frc for logging
@@ -177,10 +180,11 @@ var GamePlayScene = function(game, stage)
     {
       canv.context.fillStyle = "#000000";
       canv.context.strokeStyle = "#000000";
-      self.posg.plot(len(self.pos));
+      self.posg.plot(len(self.posd));
+      //console.log(len(self.posd));
       self.posg.draw(canv);
       drawPt(canv,self.pos,2);
-      //prin(canv,"pos",self.pos,10);
+      //prin(canv,"pos",self.posd,10);
 
       canv.context.strokeStyle = "#0000FF";
       self.ppog.plot(len(self.ppo));
@@ -263,6 +267,7 @@ var GamePlayScene = function(game, stage)
     }
     self.resolveVelocity = function()
     {
+      copy(self.pos,self.posd);
       if(self.vel[0] == 0 && self.vel[1] == 0) return;
       if(self.on)
       {
@@ -271,7 +276,7 @@ var GamePlayScene = function(game, stage)
         var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);      //find closest t for ppo
         copy(self.s.ptForT(tmp_t),self.map);                         //nearest ppo -> map
         if(iseq(self.map,self.pos)) return;                          //(if map is pos [no movement] return)
-        if(false)//(lensqr(sub(self.map,self.ppo)) > 1000)
+        if(len(sub(self.map,self.ppo)) > 2)
           self.on = false;
         else
         {
@@ -294,6 +299,7 @@ var GamePlayScene = function(game, stage)
         self.pos[0] += self.vel[0];
         self.pos[1] += self.vel[1];
       }
+      copy(sub(self.pos,self.posd),self.posd);
     }
 
     self.draw = function(canv)
@@ -305,7 +311,7 @@ var GamePlayScene = function(game, stage)
 
   self.ready = function()
   {
-    clicker = new Clicker({source:stage.dispCanv.canvas});
+    presser = new Presser({source:stage.dispCanv.canvas});
 
     s = new Spline(
      derivePtsFromPtsMode([
@@ -332,7 +338,7 @@ var GamePlayScene = function(game, stage)
     c = new Car(s);
 
     f = new ForceBtn();
-    clicker.register(f);
+    presser.register(f);
 
     var pt = s.ptForT(0);
     c.x = pt[0];
@@ -341,8 +347,9 @@ var GamePlayScene = function(game, stage)
 
   self.tick = function()
   {
-    clicker.flush();
+    presser.flush();
     c.tick();
+    f.tick();
   };
 
   self.draw = function()
