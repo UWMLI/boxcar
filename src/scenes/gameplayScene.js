@@ -9,6 +9,11 @@ var GamePlayScene = function(game, stage)
   var hoverer;
   var drawer;
 
+  var t;
+  var c;
+  var s;
+  var f;
+
   var ForceBtn = function()
   {
     var self = this;
@@ -18,15 +23,8 @@ var GamePlayScene = function(game, stage)
     self.w = 100;
     self.h = 100;
 
-    self.click = function(evt)
-    {
-      c.applyForce(10);
-    }
-
-    self.draw = function(canv)
-    {
-      canv.context.strokeRect(self.x,self.y,self.w,self.h);
-    }
+    self.click = function(evt) { c.applyForce(10); }
+    self.draw = function(canv) { canv.context.strokeRect(self.x,self.y,self.w,self.h); }
   }
 
   var Track = function(s)
@@ -95,95 +93,6 @@ var GamePlayScene = function(game, stage)
     self.m = 10; //mass   (const)
     self.e = 0;  //energy
 
-    var copy = function(a,b)
-    {
-      b[0] = a[0];
-      b[1] = a[1];
-      return b;
-    }
-    var lensqr = function(vec)
-    {
-      return vec[0]*vec[0]+vec[1]*vec[1];
-    }
-    var len = function(vec)
-    {
-      return Math.sqrt(lensqr(vec));
-    }
-    var iseq = function(a,b)
-    {
-      return a[0] == b[0] && a[1] == b[1];
-    }
-    var addr = [0,0];
-    var add = function(a,b)
-    {
-      addr[0] = a[0]+b[0];
-      addr[1] = a[1]+b[1];
-      return addr;
-    }
-    var subr = [0,0];
-    var sub = function(a,b)
-    {
-      subr[0] = a[0]-b[0];
-      subr[1] = a[1]-b[1];
-      return subr;
-    }
-    var scalmul = function(vec,scal)
-    {
-      vec[0] *= scal;
-      vec[1] *= scal;
-      return vec;
-    }
-    var scaldiv = function(vec,scal)
-    {
-      vec[0] /= scal;
-      vec[1] /= scal;
-      return vec;
-    }
-    var norm = function(vec)
-    {
-      scaldiv(vec,len(vec));
-      return vec;
-    }
-    var dot = function(a,b)
-    {
-      return a[0]*b[0]+a[1]*b[1];
-    }
-    var cosangle = function(a,b)
-    {
-      return dot(a,b)/(len(a)*len(b));
-    }
-    var proja = [0,0];
-    var projb = [0,0];
-    var proj = function(a,b)
-    {
-      return scalmul(norm(copy(b,projb)),len(a)*cosangle(a,b));
-    }
-
-    var drawArrow = function(canv,from,to)
-    {
-      canv.context.beginPath();
-      canv.context.moveTo(from[0],from[1]);
-      canv.context.lineTo(to[0],to[1]);
-      /*
-      var arrow = [0,0];
-      var arrow2 = [0,0];
-      copy(sub(to,from),arrow);
-      arrow2[0] = -arrow[1];
-      arrow2[1] = arrow[0];
-      copy(add(arrow2,to),arrow);
-      canv.context.moveTo(to[0],to[1]);
-      canv.context.lineTo(arrow[0],arrow[1]);
-      */
-      canv.context.stroke();
-    }
-
-    var drawPt = function(canv,pt,r)
-    {
-      canv.context.beginPath();
-      canv.context.arc(pt[0],pt[1],r,0,2*Math.PI);
-      canv.context.stroke();
-    }
-
     self.resetOnSpline = function()
     {
       self.t = 0;
@@ -220,15 +129,9 @@ var GamePlayScene = function(game, stage)
              self.pos[1]-self.r < y || self.pos[1]+self.r > y+h);
     }
 
-    var otherobs = [];
-    var prin = function(canv,thing,vec,y)
-    {
-      stage.drawCanv.context.fillText(thing+"("+vec[0]+","+vec[1]+") : "+len(vec),10,y);
-    }
     var prinall = function(canv)
     {
       canv.context.fillStyle = "#000000";
-
       canv.context.strokeStyle = "#000000";
       drawPt(canv,self.pos,2);
       prin(canv,"pos",self.pos,10);
@@ -242,38 +145,34 @@ var GamePlayScene = function(game, stage)
       prin(canv,"map",self.map,50);
 
       canv.context.strokeStyle = "#00FFFF";
-      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.dir,[0,0]),100)));
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.dir,[0,0]),100)));
       prin(canv,"dir",self.dir,70);
 
       canv.context.strokeStyle = "#FF0000";
-      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.vel,[0,0]),10)));
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.vel,[0,0]),10)));
       prin(canv,"vel",self.vel,90);
 
       canv.context.strokeStyle = "#FF00FF";
-      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.pve,[0,0]),10)));
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.pve,[0,0]),10)));
       prin(canv,"pve",self.pve,110);
 
       canv.context.strokeStyle = "#FFFF00";
-      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.acc,[0,0]),10)));
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.acc,[0,0]),10)));
       prin(canv,"acc",self.acc,130);
 
       canv.context.strokeStyle = "#000000";
-      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.frc,[0,0]),10)));
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.frc,[0,0]),10)));
       prin(canv,"frc",self.frc,150);
 
       canv.context.strokeStyle = "#000000";
-      drawArrow(canv,self.pos,add(self.pos,scalmul(copy(self.ffr,[0,0]),10)));
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.ffr,[0,0]),10)));
       prin(canv,"ffr",self.ffr,170);
     }
     self.tick = function()
     {
-      self.resolveCollisions(otherobs);
       self.resolveForces();
       self.resolveAccelleration();
       self.resolveVelocity();
-    }
-    self.resolveCollisions = function(obs)
-    {
     }
     self.resolveForces = function()
     {
@@ -303,26 +202,26 @@ var GamePlayScene = function(game, stage)
       if(self.on)
       {
         var vlen = len(self.vel);
-        copy(add(self.pos,self.vel),self.ppo);
-        var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);
-        copy(self.s.ptForT(tmp_t),self.map);
-        if(iseq(self.map,self.pos)) return;
+        copy(add(self.pos,self.vel),self.ppo);                       //pos+vel -> ppo
+        var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);      //find closest t for ppo
+        copy(self.s.ptForT(tmp_t),self.map);                         //nearest ppo -> map
+        if(iseq(self.map,self.pos)) return;                          //(if map is pos [no movement] return)
         if(false)//(lensqr(sub(self.map,self.ppo)) > 1000)
           self.on = false;
         else
         {
-          copy(proj(self.vel,sub(self.map,self.pos)),self.pve);
-          copy(sub(self.pve,self.vel),self.ffr);
-          copy(self.pve,self.vel);
+          copy(proj(self.vel,sub(self.map,self.pos)),self.pve);      //project velocity onto pos2map -> pve
+          copy(sub(self.pve,self.vel),self.ffr);                     //vel2pve -> ffr
+          copy(self.pve,self.vel);                                   //pve -> vel
 
-          copy(add(self.pos,self.pve),self.pos);
+          copy(add(self.pos,self.vel),self.pos);                     //pos+vel -> pos
 
-          self.t = self.s.tForPt(self.pos,tmp_t,vlen,10);
-          copy(self.s.ptForT(self.t),self.pos);
-          copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir);
-          norm(self.dir);
+          self.t = self.s.tForPt(self.pos,tmp_t,vlen,10);            //find closest t to resulting pos
+          copy(self.s.ptForT(self.t),self.pos);                      //nearest pos -> pos
+          copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir); //pos2pos(next t) -> dir
+          norm(self.dir);                                            //normalize d
 
-          copy(proj(self.vel,self.dir),self.vel);
+          copy(proj(self.vel,self.dir),self.vel);                    //project vel onto dir -> vel
         }
       }
       if(!self.on)
@@ -339,11 +238,6 @@ var GamePlayScene = function(game, stage)
       drawPt(canv,self.pos,self.r);
     }
   };
-
-  var t;
-  var c;
-  var s;
-  var f;
 
   self.ready = function()
   {
