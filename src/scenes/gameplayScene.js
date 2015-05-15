@@ -18,13 +18,17 @@ var GamePlayScene = function(game, stage)
   {
     var self = this;
 
-    self.x = 0;
+    self.x = stage.drawCanv.canvas.width-100;
     self.y = 0;
     self.w = 100;
     self.h = 100;
 
     self.pressing = false;
-    self.press = function(evt){ self.pressing = true; }
+    self.press = function(evt)
+    {
+      if(!self.pressing && !c.on) c.resetOnSpline();
+      self.pressing = true;
+    }
     self.unpress = function(evt){ self.pressing = false; }
     self.tick = function(evt) { if(self.pressing) c.applyForce(1); }
     self.draw = function(canv) { canv.context.strokeRect(self.x,self.y,self.w,self.h); }
@@ -181,7 +185,6 @@ var GamePlayScene = function(game, stage)
       canv.context.fillStyle = "#000000";
       canv.context.strokeStyle = "#000000";
       self.posg.plot(len(self.posd));
-      //console.log(len(self.posd));
       self.posg.draw(canv);
       drawPt(canv,self.pos,2);
       //prin(canv,"pos",self.posd,10);
@@ -231,7 +234,7 @@ var GamePlayScene = function(game, stage)
       canv.context.strokeStyle = "#000000";
       self.ffrg.plot(len(self.ffr));
       self.ffrg.draw(canv);
-      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.ffr,[0,0]),10)));
+      drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.ffr,[0,0]),500)));
       //prin(canv,"ffr",self.ffr,170);
     }
     self.tick = function()
@@ -276,13 +279,14 @@ var GamePlayScene = function(game, stage)
         var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);      //find closest t for ppo
         copy(self.s.ptForT(tmp_t),self.map);                         //nearest ppo -> map
         if(iseq(self.map,self.pos)) return;                          //(if map is pos [no movement] return)
-        if(len(sub(self.map,self.ppo)) > 2)
+        if(len(sub(self.map,self.ppo)) > 0.9)
           self.on = false;
         else
         {
           copy(proj(self.vel,sub(self.map,self.pos)),self.pve);      //project velocity onto pos2map -> pve
           copy(sub(self.pve,self.vel),self.ffr);                     //vel2pve -> ffr
           copy(self.pve,self.vel);                                   //pve -> vel
+          scalmul(self.vel,0.995);
 
           copy(add(self.pos,self.vel),self.pos);                     //pos+vel -> pos
 
@@ -298,6 +302,7 @@ var GamePlayScene = function(game, stage)
       {
         self.pos[0] += self.vel[0];
         self.pos[1] += self.vel[1];
+        scalmul(self.vel,0.8);
       }
       copy(sub(self.pos,self.posd),self.posd);
     }
@@ -345,11 +350,18 @@ var GamePlayScene = function(game, stage)
     c.y = pt[1];
   };
 
+  var ttim = 0;
   self.tick = function()
   {
     presser.flush();
-    c.tick();
-    f.tick();
+
+    //ttim++;
+    ttim+=10;
+    if(ttim%10 == 0)
+    {
+      c.tick();
+      f.tick();
+    }
   };
 
   self.draw = function()
