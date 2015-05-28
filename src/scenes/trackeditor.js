@@ -30,27 +30,42 @@ var TrackEditor = function(x,y,w,h)
     [0.05454545454545454,0.26875],
     [0.15272727272727274,0.3]
       ];
+  self.scaled_seed_pts = [];
+  for(var i = 0; i < self.seed_pts.length; i++)
+    self.scaled_seed_pts[i] = [0,0]; //fill with garbage to alloc mem
+
+  self.scale_seeds = function()
+  {
+    for(var i = 0; i < self.seed_pts.length; i++)
+    {
+      copy(self.seed_pts[i],self.scaled_seed_pts[i]);
+      self.scaled_seed_pts[i][0] *= self.w;
+      self.scaled_seed_pts[i][1] *= self.h;
+      self.scaled_seed_pts[i][0] += self.x;
+      self.scaled_seed_pts[i][1] += self.y;
+    }
+  }
+  self.seed_scales = function()
+  {
+    for(var i = 0; i < self.seed_pts.length; i++)
+    {
+      copy(self.scaled_seed_pts[i],self.seed_pts[i]);
+      self.seed_pts[i][0] -= self.x;
+      self.seed_pts[i][1] -= self.y;
+      self.seed_pts[i][0] /= self.w;
+      self.seed_pts[i][1] /= self.h;
+    }
+  }
+  self.scale_seeds();
 
   self.dirty = true;
   self.updated = false;
   self.dragging = -1;
 
-  var t = 0;
-  var pt = [0,0];
   self.draw = function(canv)
   {
-    for(var i = 0; i < self.seed_pts.length; i++)
-    {
-      copy(self.seed_pts[i],pt);
-      pt[0] *= self.w;
-      pt[1] *= self.h;
-      pt[0] += self.x;
-      pt[1] += self.y;
-      if(t%1000 == 0)
-        console.log(pt);
-      drawPt(canv,pt,2);
-    }
-    t++;
+    for(var i = 0; i < self.scaled_seed_pts.length; i++)
+      drawPt(canv,self.scaled_seed_pts[i],2);
   }
 
   self.tick = function()
@@ -72,6 +87,25 @@ var TrackEditor = function(x,y,w,h)
 
       self.updated = true;
     }
+  }
+
+  self.dragStart = function(evt)
+  {
+    for(var i = 0; i < self.seed_pts.length; i++)
+    {
+
+    }
+  }
+  self.drag = function(evt)
+  {
+    if(self.dragging != -1)
+    {
+
+    }
+  }
+  self.dragFinish = function()
+  {
+    self.dragging = -1;
   }
 }
 

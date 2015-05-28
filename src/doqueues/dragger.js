@@ -51,12 +51,7 @@ var Dragger = function(init)
     doSetPosOnEvent(evt);
     for(var i = 0; i < draggables.length; i++)
     {
-      if(
-        evt.doX >= draggables[i].x &&
-        evt.doX <= draggables[i].x+draggables[i].w &&
-        evt.doY >= draggables[i].y &&
-        evt.doY <= draggables[i].y+draggables[i].h
-      )
+      if(ptWithinObj(evt.doX, evt.doY, draggables[i]))
       {
         dragging.push(draggables[i]);
         callbackQueue.push(draggables[i].dragStart);
