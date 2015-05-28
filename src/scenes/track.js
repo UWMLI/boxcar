@@ -39,7 +39,7 @@ var Track = function(s,x,y,w,h)
 
   self.draw = function(canv)
   {
-    self.canv.blitTo(canv);
+    canv.context.drawImage(self.canv.canvas, 0, 0, self.canv.canvas.width, self.canv.canvas.height, self.x, self.y, self.w, self.h);
   }
 }
 

@@ -23,6 +23,8 @@ var SportsMath = function(car,x,y,w,h)
   self.scores = [];
   self.best_score = 0;
 
+  self.top_speed = 0;
+
   self.tick = function()
   {
     self.time++;
@@ -70,7 +72,7 @@ var SportsMath = function(car,x,y,w,h)
       self.avgtime += self.times[self.times.length-1-i];
     self.avgtime /= self.nlap;
 
-    self.score = self.nlap * ((self.avgtime > 500) ? 1 : 500-self.avgtime);
+    self.score = Math.floor(Math.pow(self.nlap,1.5)) * ((self.avgtime > 500) ? 1 : 500-self.avgtime);
     if(self.score > self.best_score)
       self.best_score = self.score;
   }
