@@ -1,12 +1,11 @@
-var Car = function(s)
+var Car = function(spline)
 {
   var self = this;
 
   var pt = [];
-  self.t = 0; //t on spline
-  self.gt = false; //"greater than" 0.5 (half way around the track) used to measure laps
-  self.s = s; //spline
-  self.on = true;
+  self.spline_t = 0;
+  self.spline = spline;
+  self.on_track = true;
 
   self.pos = [0,0]; self.posd = [0,0]; //last position delta
   self.ppo = [0,0]; //projected position
@@ -96,15 +95,6 @@ var Car = function(s)
     self.resolveForces();
     self.resolveAccelleration();
     self.resolveVelocity();
-    if(self.t > 0.5)
-    {
-      self.gt = true;
-    }
-    if(self.gt && self.t < 0.5)
-    {
-      self.gt = false;
-      timer.lap();
-    }
   }
   self.resolveForces = function()
   {
@@ -135,15 +125,15 @@ var Car = function(s)
   {
     copy(self.pos,self.posd);
     if(self.vel[0] == 0 && self.vel[1] == 0) return;
-    if(self.on)
+    if(self.on_track)
     {
       var vlen = len(self.vel);
       copy(add(self.pos,self.vel),self.ppo);                       //pos+vel -> ppo
-      var tmp_t = self.s.tForPt(self.ppo,self.t,vlen/100,10);      //find closest t for ppo
-      copy(self.s.ptForT(tmp_t),self.map);                         //nearest ppo -> map
+      var tmp_t = self.spline.tForPt(self.ppo,self.spline_t,vlen/100,10);      //find closest t for ppo
+      copy(self.spline.ptForT(tmp_t),self.map);                         //nearest ppo -> map
       if(iseq(self.map,self.pos)) return;                          //(if map is pos [no movement] return)
       self.danger = len(sub(self.map,self.ppo));
-      if(self.danger > self.maxdanger) self.on = false;
+      if(self.danger > self.maxdanger) self.on_track = false;
       else
       {
         copy(proj(self.vel,sub(self.map,self.pos)),self.pve);      //project velocity onto pos2map -> pve
@@ -153,15 +143,15 @@ var Car = function(s)
 
         copy(add(self.pos,self.vel),self.pos);                     //pos+vel -> pos
 
-        self.t = self.s.tForPt(self.pos,tmp_t,vlen,10);            //find closest t to resulting pos
-        copy(self.s.ptForT(self.t),self.pos);                      //nearest pos -> pos
-        copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir); //pos2pos(next t) -> dir
+        self.spline_t = self.spline.tForPt(self.pos,tmp_t,vlen,10);            //find closest t to resulting pos
+        copy(self.spline.ptForT(self.spline_t),self.pos);                      //nearest pos -> pos
+        copy(sub(self.spline.ptForT(self.spline_t+0.0001),self.pos),self.dir); //pos2pos(next t) -> dir
         norm(self.dir);                                            //normalize d
 
         copy(proj(self.vel,self.dir),self.vel);                    //project vel onto dir -> vel
       }
     }
-    if(!self.on)
+    if(!self.on_track)
     {
       self.pos[0] += self.vel[0];
       self.pos[1] += self.vel[1];
@@ -181,13 +171,12 @@ var Car = function(s)
 
   self.resetOnSpline = function()
   {
-    self.t = 0;
-    self.gt = false;
-    copy(self.s.ptForT(self.t),self.pos);
-    copy(sub(self.s.ptForT(self.t+0.0001),self.pos),self.dir);
+    self.spline_t = 0;
+    copy(self.spline.ptForT(self.spline_t),self.pos);
+    copy(sub(self.spline.ptForT(self.spline_t+0.0001),self.pos),self.dir);
     norm(self.dir);
     self.danger = 0;
-    self.on = true;
+    self.on_track = true;
 
     self.vel = [0,0];
     self.acc = [0,0];

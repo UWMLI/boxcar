@@ -2,9 +2,7 @@ var Controller = function(p1, p2)
 {
   var self = this;
 
-  var q = 81;
-  var p = 80;
-
+  self.k = [80,81]; //p,q
   self.p = [p1,p2];
   self.down = [false,false];
 
@@ -12,17 +10,23 @@ var Controller = function(p1, p2)
   self.key_letter = function(k) { }
   self.key_down = function(e)
   {
-    if(e.keyCode == q)
-      self.down[1] = true;
-    else if(e.keyCode == p)
-      self.down[0] = true;
+    for(var i = 0; i < 2; i++)
+    {
+      if(e.keyCode == self.k[i])
+      {
+        if(!self.down[i] && !self.p[i].on_track)
+          self.p[i].resetOnSpline();
+        self.down[i] = true;
+      }
+    }
   }
   self.key_up = function(e)
   {
-    if(e.keyCode == q)
-      self.down[1] = false;
-    else if(e.keyCode == p)
-      self.down[0] = false;
+    for(var i = 0; i < 2; i++)
+    {
+      if(e.keyCode == self.k[i])
+        self.down[i] = false;
+    }
   }
 
   self.tick = function()

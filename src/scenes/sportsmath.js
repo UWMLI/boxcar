@@ -7,13 +7,29 @@ var SportsMath = function(car,x,y,w,h)
   self.w = w;
   self.h = h;
 
+  self.car = car;
+  self.checkpt = false; //greater than half way around the track; used to measure laps
+
   self.times = [];
   self.t = 0;
   self.best = 9999999;
 
+
   self.tick = function()
   {
     self.t++;
+
+    //potential race condition...
+    //car gets half way, falls off, resets back on before i see its off
+    if(!self.car.on_track) self.checkpt = false;
+
+    if(self.car.spline_t > 0.5)
+      self.checkpt = true;
+    if(self.checkpt && self.car.spline_t < 0.5)
+    {
+      self.checkpt = false;
+      self.lap();
+    }
   }
   self.lap = function()
   {
@@ -30,7 +46,7 @@ var SportsMath = function(car,x,y,w,h)
   }
   self.draw = function(canv)
   {
-    if(car.on) canv.context.fillStyle = "#000000";
+    if(self.car.on) canv.context.fillStyle = "#000000";
     else       canv.context.fillStyle = "#FF0000";
     canv.context.fillText("Time: "+self.t,self.x,self.y);
     canv.context.fillText("Best: "+self.best,self.x,self.y+20);

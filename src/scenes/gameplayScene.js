@@ -6,9 +6,8 @@ var GamePlayScene = function(game, stage)
 
   var spline;
   var track;
-  var car1;
-  var car2;
-  var sportsmath;
+  var cars = [];
+  var sportsmath = [];
   var controller;
 
   self.ready = function()
@@ -36,37 +35,40 @@ var GamePlayScene = function(game, stage)
       [84,96] ], PTS_MODE_CUBIC_BEZIER, true),
     4,1);
     track = new Track(spline,0,0,stage.drawCanv.canvas.width,stage.drawCanv.canvas.height);
-    car1 = new Car(spline);
-    car2 = new Car(spline);
-    controller = new Controller(car1, car2);
-    sportsmath = new SportsMath(car1,stage.drawCanv.canvas.width-100, 120, 100, 500);
-    sportsmath = new SportsMath(car2,stage.drawCanv.canvas.width-100, 120, 100, 500);
+    for(var i = 0; i < 2; i++)
+      cars[i] = new Car(spline);
+    for(var i = 0; i < cars.length; i++)
+      sportsmath[i] = new SportsMath(cars[i],stage.drawCanv.canvas.width-100, 120, 100, 500);
+    controller = new Controller(cars[0], cars[1]);
 
     keyer.register(controller);
 
     var pt = spline.ptForT(0);
-    car1.x = pt[0];
-    car1.y = pt[1];
-    car2.x = pt[0];
-    car2.y = pt[1];
+    for(var i = 0; i < cars.length; i++)
+    {
+      cars[i].x = pt[0];
+      cars[i].y = pt[1];
+    }
   };
 
   self.tick = function()
   {
     keyer.flush();
-    sportsmath.tick();
     controller.tick();
-    car1.tick();
-    car2.tick();
+    for(var i = 0; i < cars.length; i++)
+      cars[i].tick();
+    for(var i = 0; i < sportsmath.length; i++)
+      sportsmath[i].tick();
   };
 
   self.draw = function()
   {
     var canv = stage.drawCanv;
     track.draw(canv);
-    car1.draw(canv);
-    car2.draw(canv);
-    sportsmath.draw(canv);
+    for(var i = 0; i < cars.length; i++)
+      cars[i].draw(canv);
+    for(var i = 0; i < sportsmath.length; i++)
+      sportsmath[i].draw(canv);
   };
 
   self.cleanup = function()
