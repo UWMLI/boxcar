@@ -1,38 +1,31 @@
-var Controller = function(p1, p2)
+var Controller = function(car, key)
 {
   var self = this;
 
-  self.k = [80,81]; //p,q
-  self.p = [p1,p2];
-  self.down = [false,false];
+  self.k = key;
+  self.car = car;
+  self.down = false;
 
   self.key = function(k) { }
   self.key_letter = function(k) { }
   self.key_down = function(e)
   {
-    for(var i = 0; i < 2; i++)
+    if(e.keyCode == self.k)
     {
-      if(e.keyCode == self.k[i])
-      {
-        if(!self.down[i] && !self.p[i].on_track)
-          self.p[i].resetOnSpline();
-        self.down[i] = true;
-      }
+      if(!self.down && !self.car.on_track)
+        self.car.resetOnSpline();
+      self.down = true;
     }
   }
   self.key_up = function(e)
   {
-    for(var i = 0; i < 2; i++)
-    {
-      if(e.keyCode == self.k[i])
-        self.down[i] = false;
-    }
+    if(e.keyCode == self.k)
+      self.down = false;
   }
 
   self.tick = function()
   {
-    for(var i = 0; i < 2; i++)
-      if(self.down[i]) self.p[i].applyForce(2);
+    if(self.down) self.car.applyForce(2);
   }
 }
 

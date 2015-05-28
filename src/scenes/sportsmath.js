@@ -1,4 +1,4 @@
-var SportsMath = function(car,x,y,w,h)
+var SportsMath = function(car,controller,x,y,w,h)
 {
   var self = this;
 
@@ -8,6 +8,7 @@ var SportsMath = function(car,x,y,w,h)
   self.h = h;
 
   self.car = car;
+  self.controller = controller;
   self.checkpt = false; //greater than half way around the track; used to measure laps
 
   self.time = 0;
@@ -75,20 +76,6 @@ var SportsMath = function(car,x,y,w,h)
     self.score = Math.floor(Math.pow(self.nlap,1.5)) * ((self.avgtime > 500) ? 1 : 500-self.avgtime);
     if(self.score > self.best_score)
       self.best_score = self.score;
-  }
-  self.draw = function(canv)
-  {
-    if(self.car.on) canv.context.fillStyle = "#000000";
-    else       canv.context.fillStyle = "#FF0000";
-    canv.context.fillText("Time: "+self.time,self.x,self.y);
-    canv.context.fillText("Best: "+self.best_time,self.x,self.y+20);
-    var y = self.y+40;
-    canv.context.fillStyle = "#000000";
-    for(var i = 0; i < self.times.length; i++)
-    {
-      canv.context.fillText((self.times.length-i)+": "+self.times[self.times.length-i-1],self.x,y);
-      y+=20;
-    }
   }
 }
 
