@@ -64,8 +64,19 @@ var TrackEditor = function(x,y,w,h)
 
   self.draw = function(canv)
   {
+    var on  = "#00FF00";
+    var tan = "#FF0000";
     for(var i = 0; i < self.scaled_seed_pts.length; i++)
+    {
+           if(i == 0)  canv.context.strokeStyle = on;
+      else if(i == 1)  canv.context.strokeStyle = tan;
+      else if(i == 2)  canv.context.strokeStyle = tan;
+      else if(i == 3)  canv.context.strokeStyle = on;
+      else if((i-3)%2) canv.context.strokeStyle = tan;
+      else             canv.context.strokeStyle = on;
+
       drawPt(canv,self.scaled_seed_pts[i],2);
+    }
   }
 
   self.tick = function()
@@ -91,20 +102,27 @@ var TrackEditor = function(x,y,w,h)
 
   self.dragStart = function(evt)
   {
-    for(var i = 0; i < self.seed_pts.length; i++)
+    for(var i = 0; i < self.scaled_seed_pts.length; i++)
     {
-
+      if(ptNear(evt.doX,evt.doY,self.scaled_seed_pts[i][0],self.scaled_seed_pts[i][1],10))
+        self.dragging = i;
     }
   }
   self.drag = function(evt)
   {
     if(self.dragging != -1)
     {
-
+      self.scaled_seed_pts[self.dragging][0] = evt.doX;
+      self.scaled_seed_pts[self.dragging][1] = evt.doY;
     }
   }
   self.dragFinish = function()
   {
+    if(self.dragging != -1)
+    {
+      self.seed_scales();
+      self.dirty = true;
+    }
     self.dragging = -1;
   }
 }
