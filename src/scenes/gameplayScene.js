@@ -17,12 +17,17 @@ var GamePlayScene = function(game, stage)
   {
     keyer = new Keyer({source:stage.dispCanv.canvas});
 
-    track_editor = new TrackEditor(stage.drawCanv.canvas.width-200, stage.drawCanv.canvas.height-40);
+    var tx = 100;
+    var ty = 20;
+    var tw = stage.drawCanv.canvas.width-200;
+    var th = stage.drawCanv.canvas.height-40;
+
+    track_editor = new TrackEditor(tx,ty,tw,th);
     track_editor.tick(); //generate first track
     spline = track_editor.spline;
     track_editor.updated = false; //re-set
 
-    track = new Track(spline,100,20,stage.drawCanv.canvas.width-200,stage.drawCanv.canvas.height-40);
+    track = new Track(spline,tx,ty,tw,th);
     for(var i = 0; i < 2; i++)
     {
       cars[i] = new Car(track,(i == 0 ? "#FF0000" : "#0000FF"));
@@ -43,6 +48,15 @@ var GamePlayScene = function(game, stage)
   self.tick = function()
   {
     keyer.flush();
+    if(track_editor.updated)
+    {
+      spline = track_editor.spline;
+      track.spline = spline;
+      track.refreshCanv();
+      for(var i = 0; i < cars.length; i++)
+        cars[i].spline = spline;
+      track_editor.updated = false;
+    }
     for(var i = 0; i < cars.length; i++)
     {
       controllers[i].tick();
@@ -55,6 +69,7 @@ var GamePlayScene = function(game, stage)
   {
     var canv = stage.drawCanv;
     track.draw(canv);
+    track_editor.draw(canv);
     for(var i = 0; i < cars.length; i++)
     {
       cars[i].draw(canv);

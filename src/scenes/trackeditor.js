@@ -1,6 +1,12 @@
-var TrackEditor = function(w,h)
+var TrackEditor = function(x,y,w,h)
 {
   var self = this;
+
+  self.x = x;
+  self.y = y;
+  self.w = w;
+  self.h = h;
+
   self.spline;
 
   self.seed_pts =
@@ -29,12 +35,22 @@ var TrackEditor = function(w,h)
   self.updated = false;
   self.dragging = -1;
 
+  var t = 0;
+  var pt = [0,0];
   self.draw = function(canv)
   {
     for(var i = 0; i < self.seed_pts.length; i++)
     {
-
+      copy(self.seed_pts[i],pt);
+      pt[0] *= self.w;
+      pt[1] *= self.h;
+      pt[0] += self.x;
+      pt[1] += self.y;
+      if(t%1000 == 0)
+        console.log(pt);
+      drawPt(canv,pt,2);
     }
+    t++;
   }
 
   self.tick = function()
@@ -43,12 +59,15 @@ var TrackEditor = function(w,h)
     {
       self.dirty = false;
 
-      var derivedPts = derivePtsFromPtsMode(self.seed_pts, PTS_MODE_CUBIC_BEZIER, true);
-      for(var i = 0; i < derivedPts.length-1; i++)
+      var pts_cpy = [];
+      for(var i = 0; i < self.seed_pts.length; i++)
       {
-        derivedPts[i][0] *= w;
-        derivedPts[i][1] *= h;
+        pts_cpy.push(copy(self.seed_pts[i],[0,0]));
+        pts_cpy[i][0] *= self.w;
+        pts_cpy[i][1] *= self.h;
       }
+
+      var derivedPts = derivePtsFromPtsMode(pts_cpy, PTS_MODE_CUBIC_BEZIER, true);
       self.spline = new Spline(derivedPts, 4,1);
 
       self.updated = true;
