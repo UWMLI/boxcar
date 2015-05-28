@@ -10,18 +10,39 @@ var SportsMath = function(car,x,y,w,h)
   self.car = car;
   self.checkpt = false; //greater than half way around the track; used to measure laps
 
+  self.time = 0;
   self.times = [];
-  self.t = 0;
-  self.best = 9999999;
+  self.best_time = 999999;
 
+  self.nlap = 0;
+  self.nlaps = [];
+  self.best_nlaps = 0;
+
+  self.avgtime = 1;
+  self.score = 0;
+  self.scores = [];
+  self.best_score = 0;
 
   self.tick = function()
   {
-    self.t++;
+    self.time++;
 
     //potential race condition...
     //car gets half way, falls off, resets back on before i see its off
-    if(!self.car.on_track) self.checkpt = false;
+    if(!self.car.on_track)
+    {
+      self.nlaps.push(self.nlap);
+      self.nlap = 0;
+
+      self.scores.push(self.score);
+      self.score = 0;
+
+      self.avgtime = 0;
+
+      self.time = 0;
+
+      self.checkpt = false;
+    }
 
     if(self.car.spline_t > 0.5)
       self.checkpt = true;
@@ -33,23 +54,32 @@ var SportsMath = function(car,x,y,w,h)
   }
   self.lap = function()
   {
-    if(self.t < 20) { self.reset(); return; } //bad lap reading
-    if(self.t < self.best)
-      self.best = self.t;
+    if(self.time < 20) { self.time = 0; return; } //bad lap reading
 
-    self.times.push(self.t);
-    self.t = 0;
-  }
-  self.reset = function()
-  {
-    self.t = 0;
+    if(self.time < self.best_time)
+      self.best_time = self.time;
+    self.times.push(self.time);
+    self.time = 0;
+
+    self.nlap++;
+    if(self.nlap > self.best_nlaps)
+      self.best_nlaps = self.nlap;
+
+    self.avgtime = 0;
+    for(var i = 0; i < self.nlap; i++)
+      self.avgtime += self.times[self.times.length-1-i];
+    self.avgtime /= self.nlap;
+
+    self.score = self.nlap * ((self.avgtime > 500) ? 1 : 500-self.avgtime);
+    if(self.score > self.best_score)
+      self.best_score = self.score;
   }
   self.draw = function(canv)
   {
     if(self.car.on) canv.context.fillStyle = "#000000";
     else       canv.context.fillStyle = "#FF0000";
-    canv.context.fillText("Time: "+self.t,self.x,self.y);
-    canv.context.fillText("Best: "+self.best,self.x,self.y+20);
+    canv.context.fillText("Time: "+self.time,self.x,self.y);
+    canv.context.fillText("Best: "+self.best_time,self.x,self.y+20);
     var y = self.y+40;
     canv.context.fillStyle = "#000000";
     for(var i = 0; i < self.times.length; i++)
