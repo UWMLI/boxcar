@@ -64,15 +64,15 @@ var GamePlayScene = function(game, stage)
        ], PTS_MODE_CUBIC_BEZIER, true)
     for(var i = 0; i < pts.length-1; i++)
     {
-      pts[i][0] *= 500;
-      pts[i][1] *= 300;
+      pts[i][0] *= stage.drawCanv.canvas.width-200;
+      pts[i][1] *= stage.drawCanv.canvas.height-40;
     }
     spline = new Spline(
     pts,
     4,1);
-    track = new Track(spline,0,0,stage.drawCanv.canvas.width,stage.drawCanv.canvas.height);
+    track = new Track(spline,100,20,stage.drawCanv.canvas.width-200,stage.drawCanv.canvas.height-40);
     for(var i = 0; i < 2; i++)
-      cars[i] = new Car(spline);
+      cars[i] = new Car(track);
     for(var i = 0; i < cars.length; i++)
       sportsmath[i] = new SportsMath(cars[i],stage.drawCanv.canvas.width-100, 120, 100, 500);
     controller = new Controller(cars[0], cars[1]);

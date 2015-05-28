@@ -1,8 +1,8 @@
-var Track = function(s,x,y,w,h)
+var Track = function(spline,x,y,w,h)
 {
   var self = this;
 
-  self.s = s;
+  self.spline = spline;
   self.x = x;
   self.y = y;
   self.w = w;
@@ -31,9 +31,9 @@ var Track = function(s,x,y,w,h)
   {
     self.canv.clear();
     self.canv.context.strokeStyle = "#999999";
-    stampSpline(self.canv,self.s,1000,20);
+    stampSpline(self.canv,self.spline,1000,20);
     self.canv.context.strokeStyle = "#000000";
-    stampSpline(self.canv,self.s,1000,1);
+    stampSpline(self.canv,self.spline,1000,1);
   }
   self.refreshCanv();
 

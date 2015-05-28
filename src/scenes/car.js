@@ -1,10 +1,11 @@
-var Car = function(spline)
+var Car = function(track)
 {
   var self = this;
 
   var pt = [];
+  self.track = track;
   self.spline_t = 0;
-  self.spline = spline;
+  self.spline = track.spline;
   self.on_track = true;
 
   self.pos = [0,0]; self.posd = [0,0]; //last position delta
@@ -51,43 +52,38 @@ var Car = function(spline)
         self.pos[1]-self.r < y || self.pos[1]+self.r > y+h);
   }
 
+  var offset_pos = [0,0];
   var prinall = function(canv)
   {
+    copy(add(self.pos,track_offset),offset_pos);
+
     canv.context.fillStyle = "#000000";
     canv.context.strokeStyle = "#000000";
-    drawPt(canv,self.pos,2);
+    drawPt(canv,offset_pos,2);
     //prin(canv,"pos",self.posd,10);
 
-    canv.context.strokeStyle = "#0000FF";
-    drawPt(canv,self.ppo,2);
-    //prin(canv,"ppo",self.ppo,30);
-
-    canv.context.strokeStyle = "#00FF00";
-    drawPt(canv,self.map,5);
-    //prin(canv,"map",self.map,50);
-
     canv.context.strokeStyle = "#00FFFF";
-    drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.dir,[0,0]),100)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.dir,[0,0]),100)));
     //prin(canv,"dir",self.dir,70);
 
     canv.context.strokeStyle = "#FF0000";
-    drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.vel,[0,0]),10)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.vel,[0,0]),10)));
     //prin(canv,"vel",self.vel,90);
 
     canv.context.strokeStyle = "#FF00FF";
-    drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.pve,[0,0]),10)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.pve,[0,0]),10)));
     //prin(canv,"pve",self.pve,110);
 
     canv.context.strokeStyle = "#FFFF00";
-    drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.cacc,[0,0]),10)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.cacc,[0,0]),10)));
     //prin(canv,"acc",self.cacc,130);
 
     canv.context.strokeStyle = "#000000";
-    drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.frc,[0,0]),10)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.frc,[0,0]),10)));
     //prin(canv,"frc",self.frc,150);
 
     canv.context.strokeStyle = "#000000";
-    drawVec(canv,self.pos,add(self.pos,scalmul(copy(self.ffr,[0,0]),500)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.ffr,[0,0]),500)));
     //prin(canv,"ffr",self.ffr,170);
   }
   self.tick = function()
@@ -160,12 +156,16 @@ var Car = function(spline)
     copy(sub(self.pos,self.posd),self.posd);
   }
 
+  var track_offset = [0,0];
   self.draw = function(canv)
   {
     var d = self.danger/self.maxdanger;
     canv.context.strokeStyle = "rgba("+Math.floor(d*255)+",0,0,1)";
     canv.context.lineWidth = 3;
-    drawPt(canv,self.pos,self.r);
+    track_offset[0] = self.track.x;
+    track_offset[1] = self.track.y;
+    drawPt(canv,add(self.pos,track_offset),self.r);
+    prinall(canv,track_offset);
     canv.context.lineWidth = 1;
   }
 
