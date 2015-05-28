@@ -1,4 +1,4 @@
-var Car = function(track)
+var Car = function(track, color)
 {
   var self = this;
 
@@ -7,6 +7,7 @@ var Car = function(track)
   self.spline_t = 0;
   self.spline = track.spline;
   self.on_track = true;
+  self.color = color;
 
   self.pos = [0,0]; self.posd = [0,0]; //last position delta
   self.ppo = [0,0]; //projected position
@@ -160,7 +161,8 @@ var Car = function(track)
   self.draw = function(canv)
   {
     var d = self.danger/self.maxdanger;
-    canv.context.strokeStyle = "rgba("+Math.floor(d*255)+",0,0,1)";
+    canv.context.strokeStyle = self.color;
+    //canv.context.strokeStyle = "rgba("+Math.floor(d*255)+",0,0,1)";
     canv.context.lineWidth = 3;
     track_offset[0] = self.track.x;
     track_offset[1] = self.track.y;

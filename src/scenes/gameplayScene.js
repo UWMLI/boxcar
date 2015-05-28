@@ -11,7 +11,7 @@ var GamePlayScene = function(game, stage)
   var controllers = [];
   var uis = [];
 
-  var UI = function(car, controller, sportsmath, key, x,y,w,h)
+  var UI = function(car, controller, sportsmath, x,y,w,h)
   {
     var self = this;
 
@@ -23,7 +23,7 @@ var GamePlayScene = function(game, stage)
     self.car = car;
     self.controller = controller;
     self.sportsmath = sportsmath;
-    self.key = key;
+    self.key = String.fromCharCode(self.controller.k).toLowerCase();
 
     var UI_MODE_COUNT = 0;
     var UI_MODE_TIME  = UI_MODE_COUNT; UI_MODE_COUNT++;
@@ -39,9 +39,11 @@ var GamePlayScene = function(game, stage)
 
       font_size = 30;
       canv.context.font = font_size+"px Helvetica";
+      canv.context.fillStyle = self.car.color;
       canv.context.fillText(self.key,self.x+self.w/2-(font_size/2),self.y+font_size);
       y_offset += font_size;
 
+      canv.context.fillStyle = "#000000";
       switch(self.mode)
       {
         case UI_MODE_TIME:
@@ -149,7 +151,7 @@ var GamePlayScene = function(game, stage)
        [0.07090909090909091,0.615625],
        [0.05454545454545454,0.26875],
        [0.15272727272727274,0.3]
-       ], PTS_MODE_CUBIC_BEZIER, true)
+       ], PTS_MODE_CUBIC_BEZIER, true);
     for(var i = 0; i < pts.length-1; i++)
     {
       pts[i][0] *= stage.drawCanv.canvas.width-200;
@@ -161,11 +163,11 @@ var GamePlayScene = function(game, stage)
     track = new Track(spline,100,20,stage.drawCanv.canvas.width-200,stage.drawCanv.canvas.height-40);
     for(var i = 0; i < 2; i++)
     {
-      cars[i] = new Car(track);
-      controllers[i] = new Controller(cars[i], (i == 0 ? 80 : 81));
+      cars[i] = new Car(track,(i == 0 ? "#FF0000" : "#0000FF"));
+      controllers[i] = new Controller(cars[i], (i == 0 ? 81 : 80));
       keyer.register(controllers[i]);
       sportsmath[i] = new SportsMath(cars[i], controllers[i], stage.drawCanv.canvas.width-100, 120, 100, 500);
-      uis[i] = new UI(cars[i], controllers[i], sportsmath[i], i ? 'p' : 'q', i*(stage.drawCanv.canvas.width-200),0,200,400);
+      uis[i] = new UI(cars[i], controllers[i], sportsmath[i], i*(stage.drawCanv.canvas.width-200),0,200,400);
     }
 
     var pt = spline.ptForT(0);
