@@ -68,13 +68,8 @@ var TrackEditor = function(x,y,w,h)
     var tan = "#FF0000";
     for(var i = 0; i < self.scaled_seed_pts.length; i++)
     {
-           if(i == 0)  canv.context.strokeStyle = on;
-      else if(i == 1)  canv.context.strokeStyle = tan;
-      else if(i == 2)  canv.context.strokeStyle = tan;
-      else if(i == 3)  canv.context.strokeStyle = on;
-      else if((i-3)%2) canv.context.strokeStyle = tan;
-      else             canv.context.strokeStyle = on;
-
+      if(i%2) canv.context.strokeStyle = on;
+      else    canv.context.strokeStyle = tan;
       drawPt(canv,self.scaled_seed_pts[i],2);
     }
   }
