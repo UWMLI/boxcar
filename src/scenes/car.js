@@ -63,10 +63,6 @@ var Car = function(track, color)
     drawPt(canv,offset_pos,2);
     //prin(canv,"pos",self.posd,10);
 
-    canv.context.strokeStyle = "#00FFFF";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.dir,[0,0]),100)));
-    //prin(canv,"dir",self.dir,70);
-
     canv.context.strokeStyle = "#FF0000";
     drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.vel,[0,0]),10)));
     //prin(canv,"vel",self.vel,90);

@@ -36,7 +36,8 @@ var GamePlayScene = function(game, stage)
       controllers[i] = new Controller(cars[i], (i == 0 ? 81 : 80));
       keyer.register(controllers[i]);
       sportsmath[i] = new SportsMath(cars[i], controllers[i], stage.drawCanv.canvas.width-100, 120, 100, 500);
-      uis[i] = new UI(cars[i], controllers[i], sportsmath[i], i*(stage.drawCanv.canvas.width-200),0,200,400);
+      uis[i] = new UI(cars[i], controllers[i], sportsmath[i], i*(stage.drawCanv.canvas.width-200),0,200,400,1-i,((i == 0) ? 119 : 111));
+      keyer.register(uis[i]);
     }
 
     var pt = spline.ptForT(0);

@@ -19,7 +19,7 @@ var SportsMath = function(car,controller,x,y,w,h)
   self.nlaps = [];
   self.best_nlaps = 0;
 
-  self.avgtime = 1;
+  self.avgtime = 0;
   self.score = 0;
   self.scores = [];
   self.best_score = 0;
