@@ -9,7 +9,6 @@ var TrackEditor = function(x,y,w,h)
 
   self.spline;
 
-/*
   //original
   self.seed_pts =
   [
@@ -32,8 +31,8 @@ var TrackEditor = function(x,y,w,h)
     [0.2868181818181818,0.29],
     [0.3615909090909091,0.22749999999999998]
   ];
-  */
 
+/*
   //oval
   self.seed_pts =
   [
@@ -42,6 +41,7 @@ var TrackEditor = function(x,y,w,h)
     [0.5,0.9],[0.25,0.9],
     [0.1,0.5],[0.1,0.25]
   ];
+*/
 
 /*
   for(var i = 0; i < self.seed_pts.length; i++)
