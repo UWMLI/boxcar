@@ -72,7 +72,7 @@ var TrackEditor = function(x,y,w,h)
 
   self.draw = function(canv)
   {
-    if(!self.hovering) return;
+    if(!self.down) return;
     var on  = "#00FF00";
     var tan = "#FF0000";
     var black = "#000000";
@@ -118,6 +118,7 @@ var TrackEditor = function(x,y,w,h)
 
   self.dragStart = function(evt)
   {
+    if(!self.down) return;
     for(var i = 0; i < self.scaled_seed_pts.length; i++)
     {
       if(ptNear(evt.doX,evt.doY,self.scaled_seed_pts[i][0],self.scaled_seed_pts[i][1],10))
@@ -149,14 +150,18 @@ var TrackEditor = function(x,y,w,h)
     self.dragging = -1;
   }
 
-  self.hovering = false;
-  self.hover = function()
+  self.key = function(k) { }
+  self.key_letter = function(k) { }
+  self.key_down = function(e)
   {
-    self.hovering = true;
+    if(e.keyCode == 16) //shift
+      self.down = true;
   }
-  self.unhover = function()
+  self.key_up = function(e)
   {
-    self.hovering = false;
+    if(e.keyCode == 16) //shift
+      self.down = false;
   }
+
 }
 
