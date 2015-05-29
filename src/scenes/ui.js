@@ -165,6 +165,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
+        canv.context.fillStyle = "#FF00FF";
         canv.context.fillText("Speed:"+Math.round(self.sportsmath.speed*10)/10+"m/s",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
         font_size = 15;
@@ -176,6 +177,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
+        canv.context.fillStyle = "#00FFFF";
         canv.context.fillText("Accel:"+Math.round(self.sportsmath.accel*1000)/1000+"m/s/s",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
         font_size = 15;
@@ -187,6 +189,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
+        canv.context.fillStyle = "#00FF00";
         canv.context.fillText("Friction:"+Math.round(self.sportsmath.fric*10)/10+"N",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
         font_size = 15;
@@ -216,6 +219,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
+        canv.context.fillStyle = "#000000";
         canv.context.fillText("Mass:"+Math.round(self.sportsmath.mass*10)/10+"kg",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
 
@@ -234,6 +238,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
+        canv.context.fillStyle = "#000000";
         canv.context.fillText("Power:"+Math.round(self.sportsmath.impulse*10)/10+"N",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
 
