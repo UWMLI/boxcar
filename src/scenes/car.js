@@ -18,6 +18,7 @@ var Car = function(track, color)
   self.acc = [0,0]; self.cacc = [0,0]; //cached accel for logging
   self.frc = [0,0]; self.cfrc = [0,0]; //cached frc for logging
   self.ffr = [0,0]; self.cffr = [0,0]; //cached ffr for logging //force of friction
+  self.afr = [0,0]; self.cafr = [0,0]; //cached afr for logging //accel of friction
 
   self.x = self.pos[0];
   self.y = self.pos[1];
@@ -91,24 +92,24 @@ var Car = function(track, color)
     if(self.vel[0] == 0 && self.vel[1] == 0) return;
     if(self.on_track)
     {
+      //Find projected pos and map
       var vlen = len(self.vel);
       copy(add(self.pos,self.vel),self.ppo);                               //pos+vel -> ppo
       var tmp_t = self.spline.tForPt(self.ppo,self.spline_t,vlen/100,100); //find closest t for ppo
       copy(self.spline.ptForT(tmp_t),self.map);                            //nearest ppo -> map
       if(iseq(self.map,self.pos)) return;                                  //(if map is pos [no movement] return)
 
-      self.danger = len(sub(self.map,self.ppo))*self.mass;
+      copy(sub(self.map,self.ppo),self.afr);
+      scalmul(copy(self.afr,self.ffr),self.mass);
+      self.danger = len(self.ffr);
       if(self.danger > self.maxdanger) self.on_track = false;
       else
       {
-        copy(proj(self.vel,sub(self.map,self.pos)),self.pve);      //project velocity onto pos2map -> pve
-        copy(sub(self.pve,self.vel),self.ffr);                     //vel2pve -> ffr
-        copy(self.pve,self.vel);                                   //pve -> vel
+        copy(add(self.vel,self.afr),self.vel);
         scalmul(self.vel,0.995);
-
         copy(add(self.pos,self.vel),self.pos);                     //pos+vel -> pos
 
-        self.spline_t = self.spline.tForPt(self.pos,tmp_t,vlen,100);           //find closest t to resulting pos
+        self.spline_t = self.spline.tForPt(self.pos,tmp_t,vlen/100,100);           //find closest t to resulting pos
         copy(self.spline.ptForT(self.spline_t),self.pos);                      //nearest pos -> pos
 
         copy(sub(self.spline.ptForT(self.spline_t+0.0001),self.pos),self.dir); //pos2pos(next t) -> dir
