@@ -22,11 +22,11 @@ var Car = function(track, color)
   self.x = self.pos[0];
   self.y = self.pos[1];
   self.r = 10; //radius (const)
-  self.mass = 10; //mass   (const)
+  self.mass = 15; //mass   (const)
   self.impulse = 2;
   self.energy = 0;  //energy
   self.danger = 0; //about-to-fall-off-ness
-  self.maxdanger = 0.9; //when you fall off
+  self.maxdanger = 4;//0.9; //when you fall off
 
   self.charge = function()
   {
@@ -92,11 +92,12 @@ var Car = function(track, color)
     if(self.on_track)
     {
       var vlen = len(self.vel);
-      copy(add(self.pos,self.vel),self.ppo);                              //pos+vel -> ppo
-      var tmp_t = self.spline.tForPt(self.ppo,self.spline_t,vlen/100,10); //find closest t for ppo
-      copy(self.spline.ptForT(tmp_t),self.map);                           //nearest ppo -> map
-      if(iseq(self.map,self.pos)) return;                                 //(if map is pos [no movement] return)
-      self.danger = len(sub(self.map,self.ppo));
+      copy(add(self.pos,self.vel),self.ppo);                               //pos+vel -> ppo
+      var tmp_t = self.spline.tForPt(self.ppo,self.spline_t,vlen/100,100); //find closest t for ppo
+      copy(self.spline.ptForT(tmp_t),self.map);                            //nearest ppo -> map
+      if(iseq(self.map,self.pos)) return;                                  //(if map is pos [no movement] return)
+
+      self.danger = len(sub(self.map,self.ppo))*self.mass;
       if(self.danger > self.maxdanger) self.on_track = false;
       else
       {
@@ -107,8 +108,9 @@ var Car = function(track, color)
 
         copy(add(self.pos,self.vel),self.pos);                     //pos+vel -> pos
 
-        self.spline_t = self.spline.tForPt(self.pos,tmp_t,vlen,10);            //find closest t to resulting pos
+        self.spline_t = self.spline.tForPt(self.pos,tmp_t,vlen,100);           //find closest t to resulting pos
         copy(self.spline.ptForT(self.spline_t),self.pos);                      //nearest pos -> pos
+
         copy(sub(self.spline.ptForT(self.spline_t+0.0001),self.pos),self.dir); //pos2pos(next t) -> dir
         norm(self.dir);                                            //normalize d
 
@@ -147,11 +149,11 @@ var Car = function(track, color)
 
     //acc
     canv.context.strokeStyle = "#00FFFF";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.cacc,[0,0]),1000)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.cacc,[0,0]),10000)));
 
     //fric
     canv.context.strokeStyle = "#00FF00";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.ffr,[0,0]),200)));
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.ffr,[0,0]),300)));
 
     canv.context.strokeStyle = "#000000";
   }
