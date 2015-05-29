@@ -43,6 +43,7 @@ var GamePlayScene = function(game, stage)
       controllers[i] = new Controller(cars[i], (i == 0 ? 81 : 80));
       keyer.register(controllers[i]);
       sportsmath[i] = new SportsMath(cars[i], controllers[i], stage.drawCanv.canvas.width-100, 120, 100, 500);
+      keyer.register(sportsmath[i]);
       uis[i] = new UI(cars[i], controllers[i], sportsmath[i], i*(stage.drawCanv.canvas.width-150),0,150,400,1-i,((i == 0) ? 119 : 111));
       keyer.register(uis[i]);
       dragger.register(uis[i].m_slider);

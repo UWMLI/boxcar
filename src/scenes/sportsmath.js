@@ -9,6 +9,9 @@ var SportsMath = function(car,controller,x,y,w,h)
 
   self.car = car;
   self.controller = controller;
+
+  self.reset = function()
+  {
   self.checkpt = false; //greater than half way around the track; used to measure laps
 
   self.time = 0;
@@ -38,6 +41,8 @@ var SportsMath = function(car,controller,x,y,w,h)
 
   self.mass = 0;
   self.impulse = 0;
+  }
+  self.reset();
 
   self.tick = function()
   {
@@ -111,6 +116,20 @@ var SportsMath = function(car,controller,x,y,w,h)
     self.score = Math.floor(Math.pow(self.nlap,1.5)) * ((self.avgtime > 500) ? 1 : 500-self.avgtime);
     if(self.score > self.best_score)
       self.best_score = self.score;
+  }
+
+  self.key = function(k) { }
+  self.key_letter = function(k) { }
+  self.key_down = function(e)
+  {
+    if(e.keyCode == 82) //'r'
+    {
+      self.car.resetOnSpline();
+      self.reset();
+    }
+  }
+  self.key_up = function(e)
+  {
   }
 }
 

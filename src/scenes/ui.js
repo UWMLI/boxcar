@@ -215,7 +215,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
         canv.context.fillStyle = "#00FF00";
-        canv.context.fillText("Friction:"+Math.round(self.sportsmath.fric*10)/10+"N",self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("Force Friction:"+Math.round(self.sportsmath.fric*10)/10+"N",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
