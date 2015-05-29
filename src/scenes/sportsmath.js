@@ -66,10 +66,13 @@ var SportsMath = function(car,controller,x,y,w,h)
     //car gets half way, falls off, resets back on before i see its off
     if(!self.car.on_track)
     {
-      self.nlaps.push(self.nlap);
+      if(self.time != 1)
+      {
+        self.nlaps.push(self.nlap);
+        self.scores.push(self.score);
+      }
       self.nlap = 0;
 
-      self.scores.push(self.score);
       self.score = 0;
 
       self.avgtime = 0;

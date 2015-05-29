@@ -53,7 +53,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
   var UI_MODE_COUNT = 0;
   var UI_MODE_RUN = UI_MODE_COUNT; UI_MODE_COUNT++;
-  var UI_MODE_TOP = UI_MODE_COUNT; UI_MODE_COUNT++;
+  var UI_MODE_ALL = UI_MODE_COUNT; UI_MODE_COUNT++;
   var UI_MODE_CAR = UI_MODE_COUNT; UI_MODE_COUNT++;
   self.mode = UI_MODE_RUN;
 
@@ -136,26 +136,51 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
           y_offset += font_size;
         }
         break;
-      case UI_MODE_TOP:
+      case UI_MODE_ALL:
         font_size = 20;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("TOP",self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("ALL",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("Score:"+Math.round(self.sportsmath.best_score),self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("TopScore:"+Math.round(self.sportsmath.best_score),self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("Time:"+self.sportsmath.best_time,self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("BestTime:"+self.sportsmath.best_time,self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("Laps:"+self.sportsmath.best_nlaps,self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("MostLaps:"+self.sportsmath.best_nlaps,self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
+
+        y_offset += font_size;
+
+        var tscore = self.sportsmath.score;
+        for(var i = 0; i < self.sportsmath.scores.length; i++)
+          tscore += self.sportsmath.scores[i];
+        tscore = Math.round(tscore);
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Total Score:"+tscore,self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
+        var tlaps = self.sportsmath.nlap;
+        for(var i = 0; i < self.sportsmath.nlaps.length; i++)
+          tlaps += self.sportsmath.nlaps[i];
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Total Laps:"+tlaps,self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Total Wrecks:"+self.sportsmath.nlaps.length,self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
         break;
       case UI_MODE_CAR:
         font_size = 20;

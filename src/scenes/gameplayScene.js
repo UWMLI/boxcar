@@ -4,6 +4,7 @@ var GamePlayScene = function(game, stage)
 
   var keyer;
   var dragger;
+  var hoverer;
 
   var spline;
   var track;
@@ -17,6 +18,7 @@ var GamePlayScene = function(game, stage)
   {
     keyer = new Keyer({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
+    hoverer = new Hoverer({source:stage.dispCanv.canvas});
 
     var tx = 100;
     var ty = 20;
@@ -28,6 +30,7 @@ var GamePlayScene = function(game, stage)
     spline = track_editor.spline;
     track_editor.updated = false; //re-set
     dragger.register(track_editor);
+    hoverer.register(track_editor);
 
     track = new Track(spline,tx,ty,tw,th);
     for(var i = 0; i < 2; i++)
@@ -54,6 +57,7 @@ var GamePlayScene = function(game, stage)
   self.tick = function()
   {
     dragger.flush();
+    hoverer.flush();
     keyer.flush();
     track_editor.tick();
     if(track_editor.updated)

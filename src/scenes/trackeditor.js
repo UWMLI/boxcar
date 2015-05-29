@@ -65,6 +65,7 @@ var TrackEditor = function(x,y,w,h)
 
   self.draw = function(canv)
   {
+    if(!self.hovering) return;
     var on  = "#00FF00";
     var tan = "#FF0000";
     var black = "#000000";
@@ -128,6 +129,8 @@ var TrackEditor = function(x,y,w,h)
       self.scaled_seed_pts[self.dragging][0] = evt.doX;
       self.scaled_seed_pts[self.dragging][1] = evt.doY;
     }
+      self.seed_scales();
+      self.dirty = true;
   }
   self.dragFinish = function()
   {
@@ -137,6 +140,16 @@ var TrackEditor = function(x,y,w,h)
       self.dirty = true;
     }
     self.dragging = -1;
+  }
+
+  self.hovering = false;
+  self.hover = function()
+  {
+    self.hovering = true;
+  }
+  self.unhover = function()
+  {
+    self.hovering = false;
   }
 }
 
