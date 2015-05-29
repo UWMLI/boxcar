@@ -1,21 +1,18 @@
-var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes the form of an n-length array. ex:[0,0] <- lol causes error in vim modeline
+var Spline = function(pts, chainlen) //Array of pts. Each nD pt takes the form of an n-length array. ex:[0,0] <- lol causes error in vim modeline
 {
   var self = this;
 
-  self.chainlen = (chainlen == 0) ? self.pts.length : chainlen; //num pts taken into account for any given t
-  self.overlap = overlap; //num chains each pt can take part in (0 = each chain is disjoint)
   self.pts = pts;
+  self.chainlen = (chainlen === undefined || chainlen == 0) ? self.pts.length : chainlen; //num pts taken into account for any given t
 
   /*
   Popular combos:
 
   Continuous single-chain interpolation:
   chainlen - 0
-  overlap  - 0
 
   Cubic Bezier:
   chainlen - 4
-  overlap  - 1
   */
 
   self.interpAPt = interpAPtGen;
@@ -25,7 +22,7 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
   self.calculatedPt; //last calculated pt (identical to self.derivedPts[(chain_num_of_last_t)][self.chainlen-1][0]
   self.refreshSettings = function()
   {
-    self.numchains = (self.pts.length-self.overlap)/(self.chainlen-self.overlap);
+    self.numchains = (self.pts.length-1)/(self.chainlen-1);
 
     //populate derivedPts arrays
     self.derivedPts = []; //each index = chain
@@ -37,7 +34,7 @@ var Spline = function(pts, chainlen, overlap) //Array of pts. Each nD pt takes t
         self.derivedPts[i][j] = []; //each index = pt
         for(var k = 0; k < self.chainlen-j; k++)
         {
-          if(j == 0) self.derivedPts[i][j][k] = self.pts[(i*(self.chainlen-self.overlap))+k];
+          if(j == 0) self.derivedPts[i][j][k] = self.pts[(i*(self.chainlen-1))+k];
           else       self.derivedPts[i][j][k] = [];
         }
       }
