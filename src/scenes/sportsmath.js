@@ -27,9 +27,38 @@ var SportsMath = function(car,controller,x,y,w,h)
   self.speed = 0;
   self.top_speed = 0;
 
+  self.accel = 0;
+  self.top_accel = 0;
+
+  self.fric = 0;
+  self.top_fric = 0;
+
+  self.energy = 0;
+  self.top_energy = 0;
+
+  self.mass = 0;
+
   self.tick = function()
   {
     self.time++;
+
+    self.speed = len(car.vel);
+    if(self.speed > self.top_speed)
+      self.top_speed = self.speed;
+
+    self.accel = len(car.acc);
+    if(self.accel > self.top_accel)
+      self.top_accel = self.accel;
+
+    self.fric = len(car.ffr);
+    if(self.fric > self.top_fric)
+      self.top_fric = self.fric;
+
+    self.energy = self.car.e;
+    if(self.energy > self.top_energy)
+      self.top_energy = self.energy;
+
+    self.mass   = self.car.m;
 
     //potential race condition...
     //car gets half way, falls off, resets back on before i see its off
@@ -47,10 +76,6 @@ var SportsMath = function(car,controller,x,y,w,h)
 
       self.checkpt = false;
     }
-
-    self.speed = len(car.vel);
-    if(self.speed > self.top_speed)
-      self.top_speed = self.speed;
 
     if(self.car.spline_t > 0.5)
       self.checkpt = true;

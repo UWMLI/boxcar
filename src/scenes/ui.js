@@ -129,13 +129,53 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("Laps:"+self.sportsmath.best_nlaps,self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("Speed:"+Math.round(self.sportsmath.speed*10)/10+"m/s",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Top:"+Math.round(self.sportsmath.top_speed*10)/10+"m/s",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
         y_offset += font_size;
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("Laps:"+self.sportsmath.best_nlaps,self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("Accel:"+Math.round(self.sportsmath.accel*1000)/1000+"m/s/s",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Top:"+Math.round(self.sportsmath.top_accel*1000)/1000+"m/s/s",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
+        y_offset += font_size;
+
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Friction:"+Math.round(self.sportsmath.fric*10)/10+"N",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Top:"+Math.round(self.sportsmath.top_fric*10)/10+"N",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
+        y_offset += font_size;
+
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("KinEnergy:"+Math.round(self.sportsmath.energy*10)/10+"J",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Top:"+Math.round(self.sportsmath.top_energy*10)/10+"J",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
+        y_offset += font_size;
+
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Mass:"+self.sportsmath.mass+"kg",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
         break;
     }
 
