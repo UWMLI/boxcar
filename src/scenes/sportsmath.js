@@ -24,6 +24,7 @@ var SportsMath = function(car,controller,x,y,w,h)
   self.scores = [];
   self.best_score = 0;
 
+  self.speed = 0;
   self.top_speed = 0;
 
   self.tick = function()
@@ -46,6 +47,10 @@ var SportsMath = function(car,controller,x,y,w,h)
 
       self.checkpt = false;
     }
+
+    self.speed = len(car.vel);
+    if(self.speed > self.top_speed)
+      self.top_speed = self.speed;
 
     if(self.car.spline_t > 0.5)
       self.checkpt = true;

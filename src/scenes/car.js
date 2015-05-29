@@ -12,8 +12,8 @@ var Car = function(track, color)
   self.pos = [0,0]; self.posd = [0,0]; //last position delta
   self.ppo = [0,0]; //projected position
   self.map = [0,0]; //map of projection back to spline
-  self.dir = [0,0]; self.spd = 0;
-  self.vel = [0,0]; //derivable from dir+spd
+  self.dir = [0,0];
+  self.vel = [0,0];
   self.pve = [0,0]; //projected vel
   self.acc = [0,0]; self.cacc = [0,0]; //cached accel for logging
   self.frc = [0,0]; self.cfrc = [0,0]; //cached frc for logging

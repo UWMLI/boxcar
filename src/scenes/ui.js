@@ -28,22 +28,39 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
     var x_offset = 0;
 
 
+    y_offset = 20;
+    canv.context.lineWidth = 1;
+    canv.context.strokeRect(self.x,self.y,self.w,self.h);
+    canv.context.lineWidth = 3;
+    drawPt(canv,[self.x+self.w/2,self.y+40],30);
+    canv.context.save();
+    canv.context.beginPath();
+    canv.context.moveTo(self.x,(self.y+40+30)-((self.sportsmath.speed/10)*60));
+    canv.context.lineTo(self.x+self.w,(self.y+40+30)-((self.sportsmath.speed/10)*60));
+    canv.context.lineTo(self.x+self.w,self.y+40+30);
+    canv.context.lineTo(self.x,self.y+40+30);
+    canv.context.clip();
+    drawPt(canv,[self.x+self.w/2,self.y+40],30);
+    canv.context.fillStyle = car.color.replace("00","55").replace("00","55");
+    canv.context.fill();
+    canv.context.restore();
+
     font_size = 30;
     canv.context.font = font_size+"px Helvetica";
     canv.context.fillStyle = self.car.color;
     canv.context.textAlign = "center";
-    canv.context.fillText(self.c,self.x+self.w/2,self.y+font_size);
-    y_offset += font_size;
+    canv.context.fillText(self.c,self.x+self.w/2,self.y+y_offset+font_size-4);
+    y_offset += font_size*1.5;
 
     if(left)
     {
       canv.context.textAlign = "left";
-      x_offset = 0;
+      x_offset = 10;
     }
     else
     {
       canv.context.textAlign = "right";
-      x_offset = self.w;
+      x_offset = self.w-10;
     }
 
     canv.context.fillStyle = "#000000";
@@ -67,7 +84,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("Time (AVG):"+Math.round(self.sportsmath.avgtime),self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("AvgTime:"+Math.round(self.sportsmath.avgtime),self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
 
         font_size = 15;

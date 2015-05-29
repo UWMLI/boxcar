@@ -36,7 +36,7 @@ var GamePlayScene = function(game, stage)
       controllers[i] = new Controller(cars[i], (i == 0 ? 81 : 80));
       keyer.register(controllers[i]);
       sportsmath[i] = new SportsMath(cars[i], controllers[i], stage.drawCanv.canvas.width-100, 120, 100, 500);
-      uis[i] = new UI(cars[i], controllers[i], sportsmath[i], i*(stage.drawCanv.canvas.width-200),0,200,400,1-i,((i == 0) ? 119 : 111));
+      uis[i] = new UI(cars[i], controllers[i], sportsmath[i], i*(stage.drawCanv.canvas.width-150),0,150,400,1-i,((i == 0) ? 119 : 111));
       keyer.register(uis[i]);
     }
 
@@ -73,13 +73,12 @@ var GamePlayScene = function(game, stage)
   self.draw = function()
   {
     var canv = stage.drawCanv;
+    for(var i = 0; i < cars.length; i++)
+      uis[i].draw(canv);
     track.draw(canv);
     track_editor.draw(canv);
     for(var i = 0; i < cars.length; i++)
-    {
       cars[i].draw(canv);
-      uis[i].draw(canv);
-    }
   };
 
   self.cleanup = function()
