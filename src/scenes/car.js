@@ -141,16 +141,18 @@ var Car = function(track, color)
 
     //vel
     canv.context.lineWidth = 2;
-    canv.context.strokeStyle = "#FF0000";
+    canv.context.strokeStyle = "#FF00FF";
     drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.vel,[0,0]),10)));
 
     //acc
-    canv.context.strokeStyle = "#FFFF00";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.cacc,[0,0]),10)));
+    canv.context.strokeStyle = "#00FFFF";
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.cacc,[0,0]),1000)));
 
     //fric
+    canv.context.strokeStyle = "#00FF00";
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.ffr,[0,0]),200)));
+
     canv.context.strokeStyle = "#000000";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.ffr,[0,0]),500)));
   }
 
   self.resetOnSpline = function()
