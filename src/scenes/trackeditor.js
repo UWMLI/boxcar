@@ -67,11 +67,23 @@ var TrackEditor = function(x,y,w,h)
   {
     var on  = "#00FF00";
     var tan = "#FF0000";
-    for(var i = 0; i < self.scaled_seed_pts.length; i++)
+    var black = "#000000";
+    var tpt = [];
+    for(var i = 0; i < self.scaled_seed_pts.length; i+=2)
     {
-      if(i%2) canv.context.strokeStyle = on;
-      else    canv.context.strokeStyle = tan;
+      canv.context.strokeStyle = on;
       drawPt(canv,self.scaled_seed_pts[i],2);
+      canv.context.strokeStyle = tan;
+      drawPt(canv,self.scaled_seed_pts[i+1],2);
+      self.spline.interpAPt(self.scaled_seed_pts[i+1],self.scaled_seed_pts[i],2,tpt);
+      //drawPt(canv,tpt,2);
+
+      canv.context.lineWidth = 1;
+      canv.context.strokeStyle = black;
+      canv.context.beginPath();
+      canv.context.moveTo(self.scaled_seed_pts[i+1][0],self.scaled_seed_pts[i+1][1]);
+      canv.context.lineTo(tpt[0],tpt[1]);
+      canv.context.stroke();
     }
   }
 
