@@ -92,10 +92,10 @@ var Car = function(track, color)
     if(self.on_track)
     {
       var vlen = len(self.vel);
-      copy(add(self.pos,self.vel),self.ppo);                       //pos+vel -> ppo
-      var tmp_t = self.spline.tForPt(self.ppo,self.spline_t,vlen/100,10);      //find closest t for ppo
-      copy(self.spline.ptForT(tmp_t),self.map);                         //nearest ppo -> map
-      if(iseq(self.map,self.pos)) return;                          //(if map is pos [no movement] return)
+      copy(add(self.pos,self.vel),self.ppo);                              //pos+vel -> ppo
+      var tmp_t = self.spline.tForPt(self.ppo,self.spline_t,vlen/100,10); //find closest t for ppo
+      copy(self.spline.ptForT(tmp_t),self.map);                           //nearest ppo -> map
+      if(iseq(self.map,self.pos)) return;                                 //(if map is pos [no movement] return)
       self.danger = len(sub(self.map,self.ppo));
       if(self.danger > self.maxdanger) self.on_track = false;
       else

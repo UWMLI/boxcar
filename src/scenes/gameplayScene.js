@@ -20,10 +20,16 @@ var GamePlayScene = function(game, stage)
     dragger = new Dragger({source:stage.dispCanv.canvas});
     hoverer = new Hoverer({source:stage.dispCanv.canvas});
 
+/*
     var tx = 100;
     var ty = 20;
     var tw = stage.drawCanv.canvas.width-200;
     var th = stage.drawCanv.canvas.height-40;
+*/
+    var tx = 0;
+    var ty = 0;
+    var tw = stage.drawCanv.canvas.width;
+    var th = stage.drawCanv.canvas.height;
 
     track_editor = new TrackEditor(tx,ty,tw,th);
     track_editor.tick(); //generate first track
