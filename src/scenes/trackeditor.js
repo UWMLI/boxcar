@@ -120,6 +120,11 @@ var TrackEditor = function(x,y,w,h)
   {
     if(self.dragging != -1)
     {
+      if(self.dragging%2 == 0) //origin pt, apply delta to handle
+      {
+        self.scaled_seed_pts[self.dragging+1][0] += evt.doX-self.scaled_seed_pts[self.dragging][0];
+        self.scaled_seed_pts[self.dragging+1][1] += evt.doY-self.scaled_seed_pts[self.dragging][1];
+      }
       self.scaled_seed_pts[self.dragging][0] = evt.doX;
       self.scaled_seed_pts[self.dragging][1] = evt.doY;
     }
