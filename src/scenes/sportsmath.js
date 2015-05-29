@@ -46,11 +46,11 @@ var SportsMath = function(car,controller,x,y,w,h)
     if(self.speed > self.top_speed)
       self.top_speed = self.speed;
 
-    self.accel = len(car.acc);
+    self.accel = len(car.cacc);
     if(self.accel > self.top_accel)
       self.top_accel = self.accel;
 
-    self.fric = len(car.ffr);
+    self.fric = len(car.cffr);
     if(self.fric > self.top_fric)
       self.top_fric = self.fric;
 

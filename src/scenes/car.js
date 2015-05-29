@@ -53,36 +53,6 @@ var Car = function(track, color)
         self.pos[1]-self.r < y || self.pos[1]+self.r > y+h);
   }
 
-  var offset_pos = [0,0];
-  var prinall = function(canv)
-  {
-    copy(add(self.pos,track_offset),offset_pos);
-
-    canv.context.fillStyle = "#000000";
-    canv.context.strokeStyle = "#000000";
-    drawPt(canv,offset_pos,2);
-    //prin(canv,"pos",self.posd,10);
-
-    canv.context.strokeStyle = "#FF0000";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.vel,[0,0]),10)));
-    //prin(canv,"vel",self.vel,90);
-
-    canv.context.strokeStyle = "#FF00FF";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.pve,[0,0]),10)));
-    //prin(canv,"pve",self.pve,110);
-
-    canv.context.strokeStyle = "#FFFF00";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.cacc,[0,0]),10)));
-    //prin(canv,"acc",self.cacc,130);
-
-    canv.context.strokeStyle = "#000000";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.frc,[0,0]),10)));
-    //prin(canv,"frc",self.frc,150);
-
-    canv.context.strokeStyle = "#000000";
-    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.ffr,[0,0]),500)));
-    //prin(canv,"ffr",self.ffr,170);
-  }
   self.tick = function()
   {
     self.resolveForces();
@@ -154,17 +124,33 @@ var Car = function(track, color)
   }
 
   var track_offset = [0,0];
+  var offset_pos = [0,0];
   self.draw = function(canv)
   {
-    var d = self.danger/self.maxdanger;
-    canv.context.strokeStyle = self.color;
-    //canv.context.strokeStyle = "rgba("+Math.floor(d*255)+",0,0,1)";
-    canv.context.lineWidth = 3;
     track_offset[0] = self.track.x;
     track_offset[1] = self.track.y;
-    drawPt(canv,add(self.pos,track_offset),self.r);
-    prinall(canv,track_offset);
-    canv.context.lineWidth = 1;
+    copy(add(self.pos,track_offset),offset_pos);
+
+    var d = self.danger/self.maxdanger;
+    //canv.context.strokeStyle = "rgba("+Math.floor(d*255)+",0,0,1)";
+
+    //pos
+    canv.context.strokeStyle = self.color;
+    canv.context.lineWidth = 3;
+    drawPt(canv,offset_pos,self.r);
+
+    //vel
+    canv.context.lineWidth = 2;
+    canv.context.strokeStyle = "#FF0000";
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.vel,[0,0]),10)));
+
+    //acc
+    canv.context.strokeStyle = "#FFFF00";
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.cacc,[0,0]),10)));
+
+    //fric
+    canv.context.strokeStyle = "#000000";
+    drawVec(canv,offset_pos,add(offset_pos,scalmul(copy(self.ffr,[0,0]),500)));
   }
 
   self.resetOnSpline = function()
