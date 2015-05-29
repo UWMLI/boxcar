@@ -1,3 +1,36 @@
+var Slider = function(x,y,w,h)
+{
+  var self = this;
+
+  self.x = x;
+  self.y = y;
+  self.w = w;
+  self.h = h;
+
+  self.v = 0.5;
+  self.draw = function(canv)
+  {
+    canv.context.strokeRect(self.x,self.y+self.h/2-1,self.w,2);
+    canv.context.strokeRect(self.x+self.v*self.w-2,self.y,4,self.h);
+  }
+
+  self.dragging = false;
+  self.dragStart = function(evt)
+  {
+    if(ptNear(evt.doX,evt.doY,self.x+self.v*self.w,self.y+self.h/2,10))
+      self.dragging = true;
+  }
+  self.drag = function(evt)
+  {
+    self.v = (evt.doX-self.x)/self.w;
+    if(self.v < 0) self.v = 0;
+    if(self.v > 1) self.v = 1;
+  }
+  self.dragFinish = function()
+  {
+    self.dragging = false;
+  }
+}
 var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 {
   var self = this;
@@ -14,6 +47,10 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
   self.sportsmath = sportsmath;
   self.c = String.fromCharCode(self.controller.k).toLowerCase();
 
+  self.m_slider = new Slider(0,0,100,10);
+  self.p_slider = new Slider(0,0,100,10);
+  self.f_slider = new Slider(0,0,100,10);
+
   var UI_MODE_COUNT = 0;
   var UI_MODE_RUN = UI_MODE_COUNT; UI_MODE_COUNT++;
   var UI_MODE_TOP = UI_MODE_COUNT; UI_MODE_COUNT++;
@@ -26,7 +63,6 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
     var font_size = 0;
     var y_offset = 0;
     var x_offset = 0;
-
 
     y_offset = 20;
     canv.context.lineWidth = 1;
@@ -160,6 +196,7 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
 
         y_offset += font_size;
 
+        /*
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
         canv.context.fillText("KinEnergy:"+Math.round(self.sportsmath.energy*10)/10+"J",self.x+x_offset,self.y+y_offset+font_size);
@@ -170,11 +207,51 @@ var UI = function(car, controller, sportsmath, x,y,w,h, left, key)
         y_offset += font_size;
 
         y_offset += font_size;
+        */
+
+        //Energy
+        /* hack */
+        self.car.mass = 5 + (self.m_slider.v * 20);
+        self.sportsmath.mass = self.car.mass;
 
         font_size = 15;
         canv.context.font = font_size+"px Helvetica";
-        canv.context.fillText("Mass:"+self.sportsmath.mass+"kg",self.x+x_offset,self.y+y_offset+font_size);
+        canv.context.fillText("Mass:"+Math.round(self.sportsmath.mass*10)/10+"kg",self.x+x_offset,self.y+y_offset+font_size);
         y_offset += font_size;
+
+        if(left) self.m_slider.x = self.x+x_offset;
+        else     self.m_slider.x = self.x+x_offset-100;
+        self.m_slider.y = self.y+y_offset;
+        self.m_slider.w = 100;
+        self.m_slider.draw(canv);
+
+        y_offset += font_size;
+
+        //Power
+        /* hack */
+        self.car.impulse = 0.2 + (self.p_slider.v * 4);
+        self.sportsmath.impulse = self.car.impulse;
+
+        font_size = 15;
+        canv.context.font = font_size+"px Helvetica";
+        canv.context.fillText("Power:"+Math.round(self.sportsmath.impulse*10)/10+"N",self.x+x_offset,self.y+y_offset+font_size);
+        y_offset += font_size;
+
+        if(left) self.p_slider.x = self.x+x_offset;
+        else     self.p_slider.x = self.x+x_offset-100;
+        self.p_slider.y = self.y+y_offset;
+        self.p_slider.w = 100;
+        self.p_slider.draw(canv);
+
+        y_offset += font_size;
+
+/*
+        if(left) self.f_slider.x = self.x+x_offset;
+        else     self.f_slider.x = self.x+x_offset-100;
+        self.f_slider.y = self.y+y_offset;
+        self.f_slider.w = 100;
+        self.f_slider.draw(canv);
+*/
 
         break;
     }

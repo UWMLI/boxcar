@@ -22,14 +22,15 @@ var Car = function(track, color)
   self.x = self.pos[0];
   self.y = self.pos[1];
   self.r = 10; //radius (const)
-  self.m = 10; //mass   (const)
-  self.e = 0;  //energy
+  self.mass = 10; //mass   (const)
+  self.impulse = 2;
+  self.energy = 0;  //energy
   self.danger = 0; //about-to-fall-off-ness
   self.maxdanger = 0.9; //when you fall off
 
-  self.applyEnergy = function(e)
+  self.charge = function()
   {
-    //?
+    self.applyForce(self.impulse);
   }
   self.applyForce = function(f)
   {
@@ -63,8 +64,8 @@ var Car = function(track, color)
   {
     self.frc[0] += self.ffr[0];
     self.frc[1] += self.ffr[1];
-    self.acc[0] += self.frc[0]/self.m;
-    self.acc[1] += self.frc[1]/self.m;
+    self.acc[0] += self.frc[0]/self.mass;
+    self.acc[1] += self.frc[1]/self.mass;
 
     copy(self.ffr,self.cffr);
     copy(self.frc,self.cfrc);
@@ -78,7 +79,7 @@ var Car = function(track, color)
     self.vel[0] += self.acc[0];
     self.vel[1] += self.acc[1];
 
-    self.e = self.m*lensqr(self.vel)/2;
+    self.energy = self.mass*lensqr(self.vel)/2;
 
     copy(self.acc,self.cacc);
     self.acc[0] = 0;
@@ -136,7 +137,7 @@ var Car = function(track, color)
 
     //pos
     canv.context.strokeStyle = self.color;
-    canv.context.lineWidth = 3;
+    canv.context.lineWidth = 2+((self.mass-5)/25)*8;
     drawPt(canv,offset_pos,self.r);
 
     //vel

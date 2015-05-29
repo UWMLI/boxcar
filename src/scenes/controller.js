@@ -25,7 +25,7 @@ var Controller = function(car, key)
 
   self.tick = function()
   {
-    if(self.down) self.car.applyForce(2);
+    if(self.down) self.car.charge();
   }
 }
 

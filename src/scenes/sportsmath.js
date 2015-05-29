@@ -37,6 +37,7 @@ var SportsMath = function(car,controller,x,y,w,h)
   self.top_energy = 0;
 
   self.mass = 0;
+  self.impulse = 0;
 
   self.tick = function()
   {
@@ -54,11 +55,12 @@ var SportsMath = function(car,controller,x,y,w,h)
     if(self.fric > self.top_fric)
       self.top_fric = self.fric;
 
-    self.energy = self.car.e;
+    self.energy = self.car.energy;
     if(self.energy > self.top_energy)
       self.top_energy = self.energy;
 
-    self.mass   = self.car.m;
+    self.mass = self.car.mass;
+    self.impulse = self.car.impulse;
 
     //potential race condition...
     //car gets half way, falls off, resets back on before i see its off
